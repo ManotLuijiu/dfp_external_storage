@@ -131,12 +131,22 @@ class DFPExternalStorage(Document):
 				else:
 					key_secret = get_decrypted_password("DFP External Storage", self.name, "secret_key")
 				if key_secret:
-					return MinioConnection(
-						endpoint=self.endpoint,
-						access_key=self.access_key,
-						secret_key=key_secret,
-						region=self.region,
-						secure=self.secure,
+					if self.type == 'S3':
+						# Use boto3 for AWS S3
+						import boto3
+						return AWSS3Connection(
+							access_key=self.access_key,
+							secret_key=key_secret,
+							region=self.region
+						)
+					else:
+						# Use Minio for S3 Compatible storage
+						return MinioConnection(
+							endpoint=self.endpoint,
+							access_key=self.access_key,
+							secret_key=key_secret,
+							region=self.region,
+							secure=self.secure,
 					)
 			except:
 				pass
@@ -144,6 +154,49 @@ class DFPExternalStorage(Document):
 	def remote_files_list(self):
 		return self.client.list_objects(self.bucket_name, recursive=True)
 
+class AWSS3Connection:
+	def __init__(self, access_key:str, secret_key:str, region:str):
+		import boto3
+		self.client = boto3.client(
+			's3',
+			aws_access_key_id=access_key,
+			aws_secret_access_key=secret_key,
+			region_name=region
+		)
+
+	def validate_bucket(self, bucket_name:str):
+        try:
+            self.client.head_bucket(Bucket=bucket_name)
+            frappe.msgprint(_("Great! Bucket is accessible ;)"), indicator="green", alert=True)
+            return True
+        except Exception as e:
+            frappe.throw(_("Error when looking for bucket: {}".format(str(e))))
+        return False
+
+    def remove_object(self, bucket_name:str, object_name:str):
+        return self.client.delete_object(Bucket=bucket_name, Key=object_name)
+
+    def stat_object(self, bucket_name:str, object_name:str):
+        return self.client.head_object(Bucket=bucket_name, Key=object_name)
+
+    def get_object(self, bucket_name:str, object_name:str, offset:int=0, length:int=0):
+        range_header = f'bytes={offset}-{offset+length-1}' if length else None
+        kwargs = {'Bucket': bucket_name, 'Key': object_name}
+        if range_header:
+            kwargs['Range'] = range_header
+        return self.client.get_object(**kwargs)['Body']
+
+    def fget_object(self, bucket_name:str, object_name:str, file_path:str):
+        return self.client.download_file(bucket_name, object_name, file_path)
+
+    def put_object(self, bucket_name, object_name, data, metadata=None, length=-1):
+        return self.client.upload_fileobj(data, bucket_name, object_name)
+
+    def list_objects(self, bucket_name:str, recursive=True):
+        paginator = self.client.get_paginator('list_objects_v2')
+        for page in paginator.paginate(Bucket=bucket_name):
+            for obj in page.get('Contents', []):
+                yield obj
 
 class MinioConnection:
 	def __init__(self, endpoint:str, access_key:str, secret_key:str, region:str, secure:bool):
