@@ -1,4 +1,3 @@
-
 frappe.pages['dfp-s3-bucket-list'].on_page_load = (wrapper) => {
 	const dfp_s3_bucket_list = new DFPS3BucketList(wrapper)
 	$(wrapper).bind('show', () => {
@@ -21,6 +20,11 @@ class DFPS3BucketList {
 		this.page.body.append('<div class="dfp-content-main"></div>')
 		this.$content = $(this.page.body).find('.dfp-content-main')
 
+		// Add diagnostic button in the page header
+		this.page.set_primary_action(__('Diagnose Connection'), () => {
+			this.diagnoseConnection()
+		}, 'octicon octicon-pulse')
+
 		this.make_filters()
 		this.refresh_files = frappe.utils.throttle(this.refresh_files.bind(this), 1000)
 
@@ -35,6 +39,36 @@ class DFPS3BucketList {
 			}
 		})
 	}
+
+	// Add new diagnostic method
+	diagnoseConnection() {
+        const storage_name = this.storage.get_value();
+        if (!storage_name) {
+            frappe.throw(__('Please select a storage connection first'));
+            return;
+        }
+
+        frappe.show_message(__('Diagnosing connection...'));
+
+        frappe.call({
+            method: 'dfp_external_storage.dfp_external_storage.page.dfp_s3_bucket_list.dfp_s3_bucket_list.diagnose_storage_connection',
+            args: {
+                storage_name: storage_name
+            },
+            callback: (r) => {
+                frappe.hide_message();
+                if (r.exc) {
+                    // Error handling is done by frappe
+                    return;
+                }
+                // Success handling is done by msgprint in Python
+            },
+            error: (err) => {
+                frappe.hide_message();
+                frappe.throw(__('Connection diagnosis failed: ') + err.message);
+            }
+        });
+    }
 
 	make_filters() {
 		console.log('frappe.get_route()', frappe.get_route())
@@ -123,33 +157,89 @@ class DFPS3BucketList {
 	// }
 
 	refresh_files() {
-		let template = this.template.get_value()
+		let template;
+		try {
+			template = this.template.get_value();
+			if (!template) {
+				frappe.throw(__('Template is required'));
+			}
+		} catch (e) {
+			frappe.throw(__('Error getting template value: ') + e.message);
+		}
+		console.log('Template value:', this.template.get_value());
+
+		// let template = this.template.get_value()
 		// TODO: why is not working .get_value()??
 		// let storage = this.storage.get_value()
 		// let storage = this.storage.value
+		// Get storage from route or fallback
 		let storage = frappe.get_route()[1]
-		let file_type = this.file_type.get_value()
+		if (!storage) {
+			frappe.throw(__('Storage parameter is required'));
+		}
+		console.log('Storage route:', frappe.get_route()[1]);
+
+		// Get file type with error handling
+		let file_type;
+		try {
+			file_type = this.file_type.get_value();
+		} catch (e) {
+			frappe.throw(__('Error getting file type: ') + e.message)
+		}
+		console.log('File type:', this.file_type.get_value());
+		// let file_type = this.file_type.get_value()
 		// let test = this.page.get_form_values()
 		let args = { storage, template, file_type }
 
+		// Show loading message
 		this.page.add_inner_message(__('Refreshing...'))
 
 		frappe.call({ method: 'dfp_external_storage.dfp_external_storage.page.dfp_s3_bucket_list.dfp_s3_bucket_list.get_info', args, callback: (res) => {
-				this.page.add_inner_message('')
-				this.$content.html(
-					frappe.render_template(template, {
-						files: res.message || [],
-					})
-				)
+				this.page.add_inner_message('');
 
-				let auto_refresh = this.auto_refresh.get_value()
+				// Check if response is valid
+				if (!res || !Array.isArray(res.message)) {
+					frappe.throw(__('Invalid response from server'));
+					return;
+				}
+
+				try {
+					// Render template
+					this.$content.html(
+						frappe.render_template(template, {
+							files: res.message || [],
+						})
+					);
+				} catch (e) {
+					frappe.throw(__('Error rendering template: ') + e.message);
+					return;
+				}
+				// this.$content.html(
+				// 	frappe.render_template(template, {
+				// 		files: res.message || [],
+				// 	})
+				// )
+
+				// Handle auto refresh
+				let auto_refresh;
+				try {
+					auto_refresh = this.auto_refresh.get_value();
+				} catch (e) {
+					console.error('Error getting auto_refresh value:', e);
+					return;
+				}
+				// let auto_refresh = this.auto_refresh.get_value()
 
 				// if (frappe.get_route()[0] === 'dfp-s3-bucket-list' && auto_refresh) {
 				if (frappe.get_route()[0] === 'dfp-s3-bucket-list' && auto_refresh) {
 					setTimeout(() => this.refresh_files(), 2000)
 				}
 			},
-		})
+			error: (err) => {
+				this.page.add_inner_message('');
+				frappe.throw(__('Error fetching files: ') + err.message);
+			}
+		});
 	}
 
 	fileSizeToHumansMode(size) {

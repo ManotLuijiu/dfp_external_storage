@@ -1,253 +1,279 @@
 {
- "actions": [],
- "autoname": "format:DFP.ES.{bucket_name}.{YY}{MM}{DD}.{##}",
- "creation": "2023-01-07 18:20:18.943179",
- "doctype": "DocType",
- "documentation": "https://github.com/developmentforpeople/dfp_external_storage#readme",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "enabled",
-  "title",
-  "type",
-  "html_1",
-  "endpoint",
-  "column_break_7",
-  "secure",
-  "bucket_name",
-  "region",
-  "access_key",
-  "secret_key",
-  "folders",
-  "files_within",
-  "advanced_settings_section",
-  "presigned_urls",
-  "presigned_url_expiration",
-  "presigned_mimetypes_starting",
-  "doctypes_ignored",
-  "column_break_clee",
-  "remote_size_enabled",
-  "html_mtku",
-  "stream_buffer_size",
-  "cache_files_smaller_than",
-  "cache_expiration_secs"
- ],
- "fields": [
-  {
-   "fieldname": "type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Type",
-   "options": "S3 Compatible\nAWS S3",
-   "reqd": 1
-  },
-  {
-   "description": "Access key (aka user ID) of your account in S3 service.",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "access_key",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Access Key",
-   "reqd": 1
-  },
-  {
-   "description": "Secret Key (aka password) of your account in S3 service.",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "secret_key",
-   "fieldtype": "Password",
-   "label": "Secret Key",
-   "no_copy": 1,
-   "reqd": 1
-  },
-  {
-   "default": "auto",
-   "description": "Region name of buckets in S3 service. Default value: \"auto\".",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "region",
-   "fieldtype": "Data",
-   "label": "Region",
-   "reqd": 1
-  },
-  {
-   "description": "<strong>Be careful!</strong> Please set up your bucket as private in your provider and/or remove public access to objects. <strong>Some files you upload to Frappe will be for sure private!</strong>",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "bucket_name",
-   "fieldtype": "Data",
-   "in_filter": 1,
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Bucket name",
-   "reqd": 1
-  },
-  {
-   "fieldname": "html_1",
-   "fieldtype": "HTML",
-   "options": "<p>Supports both AWS S3 and S3-compatible storage services:</p>\n<ul>\n<li><strong>AWS S3</strong>: For direct AWS S3 storage</li>\n<li><strong>S3 Compatible</strong>: For MinIO and other S3-compatible services</li>\n</ul>\n<p>Configuration parameters:</p>\n<ul>\n<li><strong>endpoint</strong>: Hostname of the S3 service (e.g., s3.amazonaws.com for AWS)</li>\n<li><strong>access_key</strong>: Access key (user ID) of your account</li>\n<li><strong>secret_key</strong>: Secret Key (password) of your account</li>\n<li><strong>secure</strong>: Use secure (TLS) connection</li>\n</ul>"
-  },
-  {
-   "description": "Only host and port. For example:\n<ul><li>[id].r2.cloudflarestorage.com:443</li><li>s3.amazonaws.com</li><li>minio:9000</li><li>...</li></ul>\nRead <a href=\"https://min.io/docs/minio/linux/developers/python/API.html\" target=\"_blank\">Minio documentation</a> for more info.",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "endpoint",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "host:port",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "description": "Should be checked for production environments. Will use secure (TLS) connection when connecting to S3 server defined in \"host:port\".",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "secure",
-   "fieldtype": "Check",
-   "label": "\u00bfSecure?"
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Select one or more specific folders. Select \"<strong>Home</strong>\" and ALL files will be uploaded to this remote (If done, you should add some ignored Doctypes, like mentioned within \"Doctypes ignored for file attachments\" below advanced settings).",
-   "fieldname": "folders",
-   "fieldtype": "Table MultiSelect",
-   "label": "Folder(s)",
-   "no_copy": 1,
-   "options": "DFP External Storage by Folder"
-  },
-  {
-   "default": "0",
-   "description": "<ul>\n<li><strong>enabled</strong>: File will be uploaded to specified bucket when:\n<ul><li>\"Folder\" defined below and \"File\" is located inside it.</li><li>\"File\" is edited and this external storage is selected.</li></ul> </li>\n<li><strong>disabled</strong>: If connection is valid, remote files will be used for viewing and downloading tasks, but no files will be uploaded to remote bucket.</li>\n</ul>\n",
-   "fieldname": "enabled",
-   "fieldtype": "Check",
-   "label": "Write enabled"
-  },
-  {
-   "description": "Choose your descriptive name",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "label": "Title or name",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "files_within",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "is_virtual": 1,
-   "label": "Files inside the bucket / Same as File(s) in top \"Connections\" area",
-   "non_negative": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "advanced_settings_section",
-   "fieldtype": "Section Break",
-   "label": "Advanced settings"
-  },
-  {
-   "default": "0",
-   "description": "Serve bucket objects directly from your S3 provider using \"pre-signed\" urls instead of use your Frappe server as proxy. If files match rules for being returned as presigned url, then cache settings are ignored. Your S3 provider offers some streaming capabilities that you may need (streaming videos for example)",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "presigned_urls",
-   "fieldtype": "Check",
-   "label": "Use presigned urls"
-  },
-  {
-   "default": "video/",
-   "depends_on": "eval:doc.presigned_urls",
-   "description": "For example, use `videos/` and all videos will be enabled.",
-   "fieldname": "presigned_mimetypes_starting",
-   "fieldtype": "Small Text",
-   "label": "Use presigned urls only for mime types starting with: (one per line)"
-  },
-  {
-   "fieldname": "column_break_clee",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "10000000",
-   "description": "Number of bytes for each iteration. Default: 10000000 bytes = 10Mb",
-   "documentation_url": "https://werkzeug.palletsprojects.com/en/3.0.x/wsgi/#werkzeug.wsgi.wrap_file",
-   "fieldname": "stream_buffer_size",
-   "fieldtype": "Int",
-   "label": "File stream buffer size (bytes)"
-  },
-  {
-   "default": "5000000",
-   "description": "Use Frappe cache over Redis to keep files smaller than and avoid calling to external service several times within time window defined below. Set to 0 to disable. Default: 5000000 bytes = 5Mb",
-   "fieldname": "cache_files_smaller_than",
-   "fieldtype": "Int",
-   "label": "Cache files smaller than (bytes)"
-  },
-  {
-   "default": "86400",
-   "description": "Default: 86400 seconds = 1 day",
-   "fieldname": "cache_expiration_secs",
-   "fieldtype": "Int",
-   "label": "Cached files expiration (seconds)"
-  },
-  {
-   "fieldname": "html_mtku",
-   "fieldtype": "HTML",
-   "options": "Below cache settings affect only to public files and files not returned as presigned url (directly from your bucket provider)"
-  },
-  {
-   "default": "10800",
-   "depends_on": "eval:doc.presigned_urls",
-   "description": "Default: 10800 seconds = 3 hours",
-   "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
-   "fieldname": "presigned_url_expiration",
-   "fieldtype": "Int",
-   "label": "Presigned url expiration (seconds)"
-  },
-  {
-   "default": "0",
-   "description": "Frappe DocType File size is limited to INT(11) in database, so if you need to store files bigger than 2GB check this setting and remote file size will be used for download/stream. Default: 0 (unchecked)",
-   "fieldname": "remote_size_enabled",
-   "fieldtype": "Check",
-   "label": "Use S3 file size"
-  },
-  {
-   "description": "DocTypes included here will not use this bucket for file storage, so default functionality will be used. Make sense for some doctypes like: \"Repost Item Valuation\", \"Data Import\", \"Prepared Report\", etc. (If you add/remove doctypes here, existent \"File\"s will not be affected unless you update them)",
-   "fieldname": "doctypes_ignored",
-   "fieldtype": "Table MultiSelect",
-   "label": "Doctypes ignored for file attachments",
-   "options": "DFP External Storage Ignored Doctype"
-  }
- ],
- "links": [
-  {
-   "group": "Remote files using this connection",
-   "link_doctype": "File",
-   "link_fieldname": "dfp_external_storage"
-  }
- ],
- "modified": "2024-05-29 09:57:12.889797",
- "modified_by": "Administrator",
- "module": "DFP External Storage",
- "name": "DFP External Storage",
- "naming_rule": "Expression",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "show_name_in_global_search": 1,
- "show_title_field_in_link": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": [],
- "title_field": "title",
- "track_changes": 1
+  "actions": [],
+  "autoname": "format:DFP.ES.{bucket_name}.{YY}{MM}{DD}.{##}",
+  "creation": "2023-01-07 18:20:18.943179",
+  "doctype": "DocType",
+  "documentation": "https://github.com/developmentforpeople/dfp_external_storage#readme",
+  "editable_grid": 1,
+  "engine": "InnoDB",
+  "field_order": [
+    "enabled",
+    "title",
+    "type",
+    "html_1",
+    "endpoint",
+    "column_break_7",
+    "secure",
+    "bucket_name",
+    "region",
+    "access_key",
+    "secret_key",
+    "folders",
+    "files_within",
+    "advanced_settings_section",
+    "presigned_urls",
+    "presigned_url_expiration",
+    "presigned_mimetypes_starting",
+    "doctypes_ignored",
+    "column_break_clee",
+    "remote_size_enabled",
+    "html_mtku",
+    "stream_buffer_size",
+    "cache_files_smaller_than",
+    "cache_expiration_secs"
+  ],
+  "fields": [
+    {
+      "fieldname": "cloudfront_section",
+      "fieldtype": "Section Break",
+      "label": "CDN Integration"
+    },
+    {
+      "fieldname": "use_cdn",
+      "fieldtype": "Check",
+      "label": "Use CDN"
+    },
+    {
+      "fieldname": "cdn_domain",
+      "fieldtype": "Data",
+      "label": "CDN Domain",
+      "description": "Your CDN domain (e.g., cdn.moo-ai.online or d1234.cloudfront.net)",
+      "depends_on": "use_cdn"
+    },
+    {
+      "fieldname": "cdn_protocol",
+      "fieldtype": "Select",
+      "label": "CDN Protocol",
+      "options": "https\nhttp",
+      "default": "https",
+      "depends_on": "use_cdn"
+    },
+    {
+      "fieldname": "type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "in_preview": 1,
+      "in_standard_filter": 1,
+      "label": "Type",
+      "options": "S3 Compatible\nAWS S3",
+      "reqd": 1,
+      "default": "AWS S3"
+    },
+    {
+      "description": "Access key (aka user ID) of your account in S3 service.",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "access_key",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Access Key",
+      "reqd": 1
+    },
+    {
+      "description": "Secret Key (aka password) of your account in S3 service.",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "secret_key",
+      "fieldtype": "Password",
+      "label": "Secret Key",
+      "no_copy": 1,
+      "reqd": 1
+    },
+    {
+      "default": "auto",
+      "description": "Region name of buckets in S3 service. Default value: \"auto\".",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "region",
+      "fieldtype": "Data",
+      "label": "Region",
+      "reqd": 1
+    },
+    {
+      "description": "<strong>Be careful!</strong> Please set up your bucket as private in your provider and/or remove public access to objects. <strong>Some files you upload to Frappe will be for sure private!</strong>",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "bucket_name",
+      "fieldtype": "Data",
+      "in_filter": 1,
+      "in_global_search": 1,
+      "in_list_view": 1,
+      "in_preview": 1,
+      "in_standard_filter": 1,
+      "label": "Bucket name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "html_1",
+      "fieldtype": "HTML",
+      "options": "<p>Supports both AWS S3 and S3-compatible storage services:</p>\n<ul>\n<li><strong>AWS S3</strong>: For direct AWS S3 storage</li>\n<li><strong>S3 Compatible</strong>: For MinIO and other S3-compatible services</li>\n</ul>\n<p>Configuration parameters:</p>\n<ul>\n<li><strong>endpoint</strong>: Hostname of the S3 service (e.g., s3.amazonaws.com for AWS)</li>\n<li><strong>access_key</strong>: Access key (user ID) of your account</li>\n<li><strong>secret_key</strong>: Secret Key (password) of your account</li>\n<li><strong>secure</strong>: Use secure (TLS) connection</li>\n</ul>"
+    },
+    {
+      "description": "Only host and port. For example:\n<ul><li>[id].r2.cloudflarestorage.com:443</li><li>s3.amazonaws.com</li><li>minio:9000</li><li>...</li></ul>\nRead <a href=\"https://min.io/docs/minio/linux/developers/python/API.html\" target=\"_blank\">Minio documentation</a> for more info.",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "endpoint",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "in_standard_filter": 1,
+      "label": "host:port",
+      "reqd": 1
+    },
+    {
+      "default": "0",
+      "description": "Should be checked for production environments. Will use secure (TLS) connection when connecting to S3 server defined in \"host:port\".",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "secure",
+      "fieldtype": "Check",
+      "label": "\u00bfSecure?"
+    },
+    {
+      "fieldname": "column_break_7",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "Select one or more specific folders. Select \"<strong>Home</strong>\" and ALL files will be uploaded to this remote (If done, you should add some ignored Doctypes, like mentioned within \"Doctypes ignored for file attachments\" below advanced settings).",
+      "fieldname": "folders",
+      "fieldtype": "Table MultiSelect",
+      "label": "Folder(s)",
+      "no_copy": 1,
+      "options": "DFP External Storage by Folder"
+    },
+    {
+      "default": "0",
+      "description": "<ul>\n<li><strong>enabled</strong>: File will be uploaded to specified bucket when:\n<ul><li>\"Folder\" defined below and \"File\" is located inside it.</li><li>\"File\" is edited and this external storage is selected.</li></ul> </li>\n<li><strong>disabled</strong>: If connection is valid, remote files will be used for viewing and downloading tasks, but no files will be uploaded to remote bucket.</li>\n</ul>\n",
+      "fieldname": "enabled",
+      "fieldtype": "Check",
+      "label": "Write enabled"
+    },
+    {
+      "description": "Choose your descriptive name",
+      "fieldname": "title",
+      "fieldtype": "Data",
+      "label": "Title or name",
+      "reqd": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "files_within",
+      "fieldtype": "Int",
+      "hidden": 1,
+      "is_virtual": 1,
+      "label": "Files inside the bucket / Same as File(s) in top \"Connections\" area",
+      "non_negative": 1
+    },
+    {
+      "collapsible": 1,
+      "fieldname": "advanced_settings_section",
+      "fieldtype": "Section Break",
+      "label": "Advanced settings"
+    },
+    {
+      "default": "0",
+      "description": "Serve bucket objects directly from your S3 provider using \"pre-signed\" urls instead of use your Frappe server as proxy. If files match rules for being returned as presigned url, then cache settings are ignored. Your S3 provider offers some streaming capabilities that you may need (streaming videos for example)",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "presigned_urls",
+      "fieldtype": "Check",
+      "label": "Use presigned urls"
+    },
+    {
+      "default": "video/",
+      "depends_on": "eval:doc.presigned_urls",
+      "description": "For example, use `videos/` and all videos will be enabled.",
+      "fieldname": "presigned_mimetypes_starting",
+      "fieldtype": "Small Text",
+      "label": "Use presigned urls only for mime types starting with: (one per line)"
+    },
+    {
+      "fieldname": "column_break_clee",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "10000000",
+      "description": "Number of bytes for each iteration. Default: 10000000 bytes = 10Mb",
+      "documentation_url": "https://werkzeug.palletsprojects.com/en/3.0.x/wsgi/#werkzeug.wsgi.wrap_file",
+      "fieldname": "stream_buffer_size",
+      "fieldtype": "Int",
+      "label": "File stream buffer size (bytes)"
+    },
+    {
+      "default": "5000000",
+      "description": "Use Frappe cache over Redis to keep files smaller than and avoid calling to external service several times within time window defined below. Set to 0 to disable. Default: 5000000 bytes = 5Mb",
+      "fieldname": "cache_files_smaller_than",
+      "fieldtype": "Int",
+      "label": "Cache files smaller than (bytes)"
+    },
+    {
+      "default": "86400",
+      "description": "Default: 86400 seconds = 1 day",
+      "fieldname": "cache_expiration_secs",
+      "fieldtype": "Int",
+      "label": "Cached files expiration (seconds)"
+    },
+    {
+      "fieldname": "html_mtku",
+      "fieldtype": "HTML",
+      "options": "Below cache settings affect only to public files and files not returned as presigned url (directly from your bucket provider)"
+    },
+    {
+      "default": "10800",
+      "depends_on": "eval:doc.presigned_urls",
+      "description": "Default: 10800 seconds = 3 hours",
+      "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
+      "fieldname": "presigned_url_expiration",
+      "fieldtype": "Int",
+      "label": "Presigned url expiration (seconds)"
+    },
+    {
+      "default": "0",
+      "description": "Frappe DocType File size is limited to INT(11) in database, so if you need to store files bigger than 2GB check this setting and remote file size will be used for download/stream. Default: 0 (unchecked)",
+      "fieldname": "remote_size_enabled",
+      "fieldtype": "Check",
+      "label": "Use S3 file size"
+    },
+    {
+      "description": "DocTypes included here will not use this bucket for file storage, so default functionality will be used. Make sense for some doctypes like: \"Repost Item Valuation\", \"Data Import\", \"Prepared Report\", etc. (If you add/remove doctypes here, existent \"File\"s will not be affected unless you update them)",
+      "fieldname": "doctypes_ignored",
+      "fieldtype": "Table MultiSelect",
+      "label": "Doctypes ignored for file attachments",
+      "options": "DFP External Storage Ignored Doctype"
+    }
+  ],
+  "links": [
+    {
+      "group": "Remote files using this connection",
+      "link_doctype": "File",
+      "link_fieldname": "dfp_external_storage"
+    }
+  ],
+  "modified": "2024-05-29 09:57:12.889797",
+  "modified_by": "Administrator",
+  "module": "DFP External Storage",
+  "name": "DFP External Storage",
+  "naming_rule": "Expression",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "print": 1,
+      "read": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "show_name_in_global_search": 1,
+  "show_title_field_in_link": 1,
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "states": [],
+  "title_field": "title",
+  "track_changes": 1
 }
