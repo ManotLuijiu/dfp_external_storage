@@ -64,7 +64,7 @@
     },
     {
       "default": "auto",
-      "description": "Region name of buckets in S3 service. Default value: \"auto\".",
+      "description": "Region name of buckets in S3 service (us-east-1, ap-southeast-1, etc.). Default value: \"auto\".",
       "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
       "fieldname": "region",
       "fieldtype": "Data",
@@ -97,6 +97,7 @@
       "in_list_view": 1,
       "in_standard_filter": 1,
       "label": "host:port",
+      "default": "https://s3.amazonaws.com",
       "reqd": 1
     },
     {
