@@ -186,23 +186,23 @@ class DFPExternalStorage(Document):
             )
 
     # Mimic Next3 Adding by Manot L.
-    @cached_property
-    def cdn_url(self):
-        """Get CDN URL if configured"""
-        if not self.use_cdn or not self.cdn_domain:
-            return None
-        return f"{self.cdn_protocol}://{self.cdn_domain.strip('/')}/"
+    # @cached_property
+    # def cdn_url(self):
+    #     """Get CDN URL if configured"""
+    #     if not self.use_cdn or not self.cdn_domain:
+    #         return None
+    #     return f"{self.cdn_protocol}://{self.cdn_domain.strip('/')}/"
 
-    def get_cdn_url(self, object_key):
-        """Generate CDN URL for an object"""
-        if not self.cdn_url:
-            return None
-        return f"{self.cdn_url}{object_key}"
+    # def get_cdn_url(self, object_key):
+    #     """Generate CDN URL for an object"""
+    #     if not self.cdn_url:
+    #         return None
+    #     return f"{self.cdn_url}{object_key}"
 
-    def serve_via_cdn(self, file_doc):
-        """Check if file should be served via CDN"""
-        # Add any file type restrictions here
-        return self.use_cdn and self.cdn_domain
+    # def serve_via_cdn(self, file_doc):
+    #     """Check if file should be served via CDN"""
+    #     # Add any file type restrictions here
+    #     return self.use_cdn and self.cdn_domain
 
     @cached_property
     def setting_stream_buffer_size(self):
@@ -632,33 +632,33 @@ class DFPExternalStorageFile(File):
                     "Failed to initialize storage client. Please check error logs for details."
                 )
 
-    def get_presigned_or_cdn_url(self):
-        """Get either CloudFront or presigned URL"""
-        if self.dfp_external_storage_doc.cdn_url:
-            return self.dfp_external_storage_doc.get_cdn_url(
-                self.dfp_external_storage_s3_key
-            )
-        return self.dfp_presigned_url_get()
+    # def get_presigned_or_cdn_url(self):
+    #     """Get either CloudFront or presigned URL"""
+    #     if self.dfp_external_storage_doc.cdn_url:
+    #         return self.dfp_external_storage_doc.get_cdn_url(
+    #             self.dfp_external_storage_s3_key
+    #         )
+    #     return self.dfp_presigned_url_get()
 
     # Add to DFPExternalStorageFile class
 
-    def get_public_url(self):
-        """Get public URL for the file (through CDN if enabled)"""
-        if not self.dfp_is_s3_remote_file():
-            return self.file_url
+    # def get_public_url(self):
+    #     """Get public URL for the file (through CDN if enabled)"""
+    #     if not self.dfp_is_s3_remote_file():
+    #         return self.file_url
 
-        if self.dfp_external_storage_doc.serve_via_cdn(self):
-            return self.dfp_external_storage_doc.get_cdn_url(
-                self.dfp_external_storage_s3_key
-            )
+    #     if self.dfp_external_storage_doc.serve_via_cdn(self):
+    #         return self.dfp_external_storage_doc.get_cdn_url(
+    #             self.dfp_external_storage_s3_key
+    #         )
 
-        # Otherwise, return presigned URL if available
-        presigned_url = self.dfp_presigned_url_get()
-        if presigned_url:
-            return presigned_url
+    #     # Otherwise, return presigned URL if available
+    #     presigned_url = self.dfp_presigned_url_get()
+    #     if presigned_url:
+    #         return presigned_url
 
-        # Fallback to regular file URL
-        return self.file_url
+    #     # Fallback to regular file URL
+    #     return self.file_url
 
     def is_image(self):
         """Check if file is an image"""

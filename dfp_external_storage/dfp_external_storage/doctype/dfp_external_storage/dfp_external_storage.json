@@ -34,31 +34,6 @@
   ],
   "fields": [
     {
-      "fieldname": "cloudfront_section",
-      "fieldtype": "Section Break",
-      "label": "CDN Integration"
-    },
-    {
-      "fieldname": "use_cdn",
-      "fieldtype": "Check",
-      "label": "Use CDN"
-    },
-    {
-      "fieldname": "cdn_domain",
-      "fieldtype": "Data",
-      "label": "CDN Domain",
-      "description": "Your CDN domain (e.g., cdn.moo-ai.online or d1234.cloudfront.net)",
-      "depends_on": "use_cdn"
-    },
-    {
-      "fieldname": "cdn_protocol",
-      "fieldtype": "Select",
-      "label": "CDN Protocol",
-      "options": "https\nhttp",
-      "default": "https",
-      "depends_on": "use_cdn"
-    },
-    {
       "fieldname": "type",
       "fieldtype": "Select",
       "in_list_view": 1,
@@ -112,10 +87,10 @@
     {
       "fieldname": "html_1",
       "fieldtype": "HTML",
-      "options": "<p>Supports both AWS S3 and S3-compatible storage services:</p>\n<ul>\n<li><strong>AWS S3</strong>: For direct AWS S3 storage</li>\n<li><strong>S3 Compatible</strong>: For MinIO and other S3-compatible services</li>\n</ul>\n<p>Configuration parameters:</p>\n<ul>\n<li><strong>endpoint</strong>: Hostname of the S3 service (e.g., s3.amazonaws.com for AWS)</li>\n<li><strong>access_key</strong>: Access key (user ID) of your account</li>\n<li><strong>secret_key</strong>: Secret Key (password) of your account</li>\n<li><strong>secure</strong>: Use secure (TLS) connection</li>\n</ul>"
+      "options": "<p>Supports both AWS S3 and S3-compatible storage services:</p>\n<ul>\n<li><strong>AWS S3</strong>: For direct AWS S3 storage</li>\n<li><strong>S3 Compatible</strong>: For MinIO and other S3-compatible services</li>\n</ul>\n<p>Configuration parameters:</p>\n<ul>\n<li><strong>endpoint</strong>: Hostname of the S3 service (e.g., https://s3.amazonaws.com for AWS)</li>\n<li><strong>access_key</strong>: Access key (user ID) of your account</li>\n<li><strong>secret_key</strong>: Secret Key (password) of your account</li>\n<li><strong>secure</strong>: Use secure (TLS) connection</li>\n</ul>"
     },
     {
-      "description": "Only host and port. For example:\n<ul><li>[id].r2.cloudflarestorage.com:443</li><li>s3.amazonaws.com</li><li>minio:9000</li><li>...</li></ul>\nRead <a href=\"https://min.io/docs/minio/linux/developers/python/API.html\" target=\"_blank\">Minio documentation</a> for more info.",
+      "description": "Only host and port. For example:\n<ul><li>[id].r2.cloudflarestorage.com:443</li><li>https://s3.amazonaws.com</li><li>minio:9000</li><li>...</li></ul>\nRead <a href=\"https://min.io/docs/minio/linux/developers/python/API.html\" target=\"_blank\">Minio documentation</a> for more info.",
       "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
       "fieldname": "endpoint",
       "fieldtype": "Data",
