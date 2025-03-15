@@ -291,6 +291,67 @@ pip install minio boto3>=1.34.0
 bench --site your-site.com install-app dfp_external_storage
 ```
 
+ในกรณีลืมติดตั้ง minio ก่อนติดตั้ง dfp_external_storage จะติดตั้งซ้ำไม่ได้ มันจะแสดง Error นี้
+
+```bash
+Installing dfp_external_storage...
+An error occurred while installing dfp_external_storage: ('Module Def', 'DFP External Storage', IntegrityError(1062, "Duplicate entry 'DFP External Storage' for key 'PRIMARY'"))
+```
+
+ให้แก้ด้วยการรันโค้ดนี้ครับ
+
+```bash
+bench --site your-site console
+```
+
+เมื่อเข้ามาที่หน้า console แล้วให้คัดลอกโค้ดทั้งหมดนี้แล้ววางตรง console ได้เลยครับ แล้วกด Enter
+
+```python
+# First, get all doctypes in this module
+doctypes = frappe.db.get_all("DocType", filters={"module": "DFP External Storage"}, fields=["name"])
+print("DocTypes to delete:", doctypes)
+
+# Delete each doctype
+for dt in doctypes:
+    print(f"Deleting DocType: {dt['name']}")
+    try:
+        # First delete any documents of this type
+        if frappe.db.table_exists(f"tab{dt['name']}"):
+            frappe.db.sql(f"DELETE FROM `tab{dt['name']}`")
+
+        # Then delete the DocType itself
+        frappe.delete_doc("DocType", dt['name'], force=True)
+    except Exception as e:
+        print(f"Error deleting {dt['name']}: {str(e)}")
+
+# Delete any pages
+pages = frappe.db.get_all("Page", filters={"module": "DFP External Storage"}, fields=["name"])
+for page in pages:
+    print(f"Deleting Page: {page['name']}")
+    frappe.delete_doc("Page", page['name'], force=True)
+
+# Delete the Module Def itself
+print("Deleting Module Def: DFP External Storage")
+if frappe.db.exists("Module Def", "DFP External Storage"):
+    frappe.delete_doc("Module Def", "DFP External Storage", force=True)
+
+# Commit the changes
+frappe.db.commit()
+print("Cleanup complete. You can now try installing the app again.")
+```
+
+เสร็จแล้วรันโค้ด
+
+```python
+exit()
+```
+
+เพื่อออกมาที่ bench ต่อไปให้รันคำสั่ง
+
+```bash
+bench --site your-site install-app dfp_external_storage
+```
+
 #### ตัวเลือกที่ 2: การติดตั้งอัตโนมัติ (พร้อมการตรวจสอบแพ็คเกจที่จำเป็น)
 
 ```bash
