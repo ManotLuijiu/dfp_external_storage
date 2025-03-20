@@ -23,7 +23,7 @@
 			<!-- <td class="etag"></td> -->
 			<td class="file-name">
 				{{ frappe.utils.encode_tags(f.name) }}<br>
-				<span class="text-muted">Etag: {{ toTitle(f.etag) }}</span>
+				<span class="text-muted">Etag: {{ f.etag }}</span>
 			</td>
 				<!-- </span> -->
 				<!-- </div> -->
@@ -38,7 +38,7 @@
 			<td class="size">{{ fileSizeToHumansMode(f.size) }}</td>
 			<td class="storage-class">
 				<span class="indicator-pill {{ f.storage_class }}">
-					{{ toTitle(f.storage_class) }}
+					{{ f.storage_class }}
 				</span>
 			</td>
 			<td class="last_modified text-muted">

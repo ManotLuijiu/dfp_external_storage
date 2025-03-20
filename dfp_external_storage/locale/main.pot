@@ -1,0 +1,644 @@
+# Translations template for DFP External Storage.
+# Copyright (C) 2025 DFP
+# This file is distributed under the same license as the DFP External Storage project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: DFP External Storage VERSION\n"
+"Report-Msgid-Bugs-To: developmentforpeople@gmail.com\n"
+"POT-Creation-Date: 2025-03-21 01:51+0642\n"
+"PO-Revision-Date: 2025-03-21 01:51+0642\n"
+"Last-Translator: developmentforpeople@gmail.com\n"
+"Language-Team: developmentforpeople@gmail.com\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.13.1\n"
+
+#. Paragraph text in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "- All files to same bucket. Create one \"External Storage\" and select folder \"Home\". All uploaded files will be placed within that bucket.<br>- Specific bucket for specific folder. Create one&nbsp;\"External Storage\" and select your desired folder. All files uploaded to that folder will be located within that bucket.<br>- Files uploaded to folders without an associated External Storage will be uploaded to Frappe server filesystem.<br><br>"
+msgstr ""
+
+#. Content of the 'html_1' (HTML) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid ""
+"<p>Supports both AWS S3 and S3-compatible storage services:</p>\n"
+"<ul>\n"
+"<li><strong>AWS S3</strong>: For direct AWS S3 storage</li>\n"
+"<li><strong>S3 Compatible</strong>: For MinIO and other S3-compatible services</li>\n"
+"</ul>\n"
+"<p>Configuration parameters:</p>\n"
+"<ul>\n"
+"<li><strong>endpoint</strong>: Hostname of the S3 service (e.g., https://s3.amazonaws.com for AWS)</li>\n"
+"<li><strong>access_key</strong>: Access key (user ID) of your account</li>\n"
+"<li><strong>secret_key</strong>: Secret Key (password) of your account</li>\n"
+"<li><strong>secure</strong>: Use secure (TLS) connection</li>\n"
+"</ul>"
+msgstr ""
+
+#. Header text in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "<span class=\"h4\"><b>Options</b></span>"
+msgstr ""
+
+#. Header text in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "<span class=\"h4\">DFP S3 External Storage</span>"
+msgstr ""
+
+#. Description of the 'Bucket name' (Data) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "<strong>Be careful!</strong> Please set up your bucket as private in your provider and/or remove public access to objects. <strong>Some files you upload to Frappe will be for sure private!</strong>"
+msgstr ""
+
+#. Description of the 'Write enabled' (Check) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid ""
+"<ul>\n"
+"<li><strong>enabled</strong>: File will be uploaded to specified bucket when:\n"
+"<ul><li>\"Folder\" defined below and \"File\" is located inside it.</li><li>\"File\" is edited and this external storage is selected.</li></ul> </li>\n"
+"<li><strong>disabled</strong>: If connection is valid, remote files will be used for viewing and downloading tasks, but no files will be uploaded to remote bucket.</li>\n"
+"</ul>\n"
+msgstr ""
+
+#. Option for the 'Type' (Select) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "AWS S3"
+msgstr ""
+
+#. Label of a Data field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Access Key"
+msgstr ""
+
+#. Description of the 'Access Key' (Data) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Access key (aka user ID) of your account in S3 service."
+msgstr ""
+
+#. Label of a Section Break field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Advanced settings"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:128
+msgid "Auto Refresh"
+msgstr ""
+
+#. Content of the 'html_mtku' (HTML) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Below cache settings affect only to public files and files not returned as presigned url (directly from your bucket provider)"
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:41
+msgid "Browse S3 Files"
+msgstr ""
+
+#. Label of a Data field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Bucket name"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:454
+msgid "Bucket not found"
+msgstr ""
+
+#. Label of a Int field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Cache files smaller than (bytes)"
+msgstr ""
+
+#. Label of a Int field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Cached files expiration (seconds)"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:183
+msgid "Can not be deleted. There are {} files using this bucket."
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:150
+msgid "Cancel"
+msgstr ""
+
+#. Description of the 'Title or name' (Data) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Choose your descriptive name"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.py:23
+msgid "Configuration issues found: {}"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:87
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:103
+msgid "Connection Failed"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:96
+msgid "Connection Successful"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:68
+msgid "Connection diagnosis failed: "
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.py:33
+msgid "Connection failed"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.py:30
+msgid "Connection successful"
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:134
+msgid "Could not generate secure URL"
+msgstr ""
+
+#. Name of a DocType
+#: dfp_external_storage/config/desktop.py:9
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:76
+msgid "DFP External Storage"
+msgstr ""
+
+#. Name of a DocType
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage_ignored_doctype/dfp_external_storage_ignored_doctype.json
+msgid "DFP External Storage Ignored Doctype"
+msgstr ""
+
+#. Name of a DocType
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage_by_folder/dfp_external_storage_by_folder.json
+msgid "DFP External Storage by Folder"
+msgstr ""
+
+#. Name of a Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "DFP S3 Storage"
+msgstr ""
+
+#. Description of the 'Presigned url expiration (seconds)' (Int) field in
+#. DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Default: 10800 seconds = 3 hours"
+msgstr ""
+
+#. Description of the 'Cached files expiration (seconds)' (Int) field in
+#. DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Default: 86400 seconds = 1 day"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:24
+msgid "Diagnose Connection"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:51
+msgid "Diagnosing connection..."
+msgstr ""
+
+#. Label of a Link field in DocType 'DFP External Storage Ignored Doctype'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage_ignored_doctype/dfp_external_storage_ignored_doctype.json
+msgid "DocType"
+msgstr ""
+
+#. Description of the 'Doctypes ignored for file attachments' (Table
+#. MultiSelect) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "DocTypes included here will not use this bucket for file storage, so default functionality will be used. Make sense for some doctypes like: \"Repost Item Valuation\", \"Data Import\", \"Prepared Report\", etc. (If you add/remove doctypes here, existent \"File\"s will not be affected unless you update them)"
+msgstr ""
+
+#. Label of a Table MultiSelect field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Doctypes ignored for file attachments"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:7
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:6
+msgid "ETAG"
+msgstr ""
+
+#. Label of a Link in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "Error Logs"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1060
+msgid "Error deleting file in remote folder."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1189
+msgid "Error downloading and removing file from remote folder."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1148
+msgid "Error downloading file from remote folder"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1097
+msgid "Error downloading to file from remote folder. Check Error Log for more information."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:240
+msgid "Error fetching files: "
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:187
+msgid "Error getting file type: "
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:167
+msgid "Error getting template value: "
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1383
+msgid "Error putting file from one remote to another."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:214
+msgid "Error rendering template: "
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:957
+msgid "Error saving file in remote folder: {}"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:396
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:457
+msgid "Error when looking for bucket: {}"
+msgstr ""
+
+#. Label of a Link in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "External Storages"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:90
+msgid "Failed to connect to S3: "
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.py:38
+msgid "Failed to diagnose storage connection: {}"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1164
+msgid "Failed to stream file"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:983
+msgid "Failed to upload file to S3: {}"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:164
+msgid "Failed to verify connection: {}"
+msgstr ""
+
+#. Linked DocType in DFP External Storage's connections
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+#: dfp_external_storage/public/js/file_uploader.js:84
+msgid "File"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:964
+msgid "File saved in local filesystem."
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:23
+msgid "File securely uploaded to S3 storage"
+msgstr ""
+
+#. Label of a Int field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "File stream buffer size (bytes)"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:114
+msgid "File type"
+msgstr ""
+
+#. Label of a Link in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+#: dfp_external_storage/public/js/file_uploader.js:77
+msgid "Files"
+msgstr ""
+
+#. Label of a Int field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Files inside the bucket / Same as File(s) in top \"Connections\" area"
+msgstr ""
+
+#. Label of a Card Break in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "Files management"
+msgstr ""
+
+#. Label of a Link field in DocType 'DFP External Storage by Folder'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage_by_folder/dfp_external_storage_by_folder.json
+msgid "Folder"
+msgstr ""
+
+#. Label of a Table MultiSelect field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Folder(s)"
+msgstr ""
+
+#. Description of the 'Use presigned urls only for mime types starting with:
+#. (one per line)' (Small Text) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "For example, use `videos/` and all videos will be enabled."
+msgstr ""
+
+#. Description of the 'Use S3 file size' (Check) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Frappe DocType File size is limited to INT(11) in database, so if you need to store files bigger than 2GB check this setting and remote file size will be used for download/stream. Default: 0 (unchecked)"
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:98
+msgid "Get URL"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:450
+msgid "Great! Bucket is accesible ;)"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:392
+msgid "Great! Bucket is accessible ;)"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1215
+msgid "Invalid file path parameters"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:202
+msgid "Invalid response from server"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:33
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:32
+msgid "Is dir"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:8
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:7
+msgid "Key"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:63
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:62
+msgid "Last refreshed"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:15
+msgid "List files in bucket"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:11
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:10
+msgid "Modified"
+msgstr ""
+
+#: dfp_external_storage/public/js/app.js:29
+msgid "No external storage name found :("
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:58
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:57
+msgid "No files found on this bucket"
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:125
+msgid "Note: This secure link will expire in ${mins} minutes"
+msgstr ""
+
+#. Description of the 'File stream buffer size (bytes)' (Int) field in DocType
+#. 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Number of bytes for each iteration. Default: 10000000 bytes = 10Mb"
+msgstr ""
+
+#. Description of the 'host:port' (Data) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid ""
+"Only host and port. For example:\n"
+"<ul><li>[id].r2.cloudflarestorage.com:443</li><li>https://s3.amazonaws.com</li><li>minio:9000</li><li>...</li></ul>\n"
+"Read <a href=\"https://min.io/docs/minio/linux/developers/python/API.html\" target=\"_blank\">Minio documentation</a> for more info."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:47
+msgid "Please select a storage connection first"
+msgstr ""
+
+#. Label of a Int field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Presigned url expiration (seconds)"
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:91
+msgid "Private"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:195
+msgid "Refreshing..."
+msgstr ""
+
+#. Label of a Data field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Region"
+msgstr ""
+
+#. Description of the 'Region' (Data) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Region name of buckets in S3 service (us-east-1, ap-southeast-1, etc.). Default value: \"auto\"."
+msgstr ""
+
+#. Group in DFP External Storage's connections
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Remote files using this connection"
+msgstr ""
+
+#. Option for the 'Type' (Select) field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "S3 Compatible"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:14
+msgid "S3 bucket files"
+msgstr ""
+
+#. Paragraph text in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "Save all your files within external S3 compatible buckets."
+msgstr ""
+
+#. Label of a Password field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Secret Key"
+msgstr ""
+
+#. Description of the 'Secret Key' (Password) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Secret Key (aka password) of your account in S3 service."
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:58
+msgid "Select S3 File"
+msgstr ""
+
+#. Description of the 'Folder(s)' (Table MultiSelect) field in DocType 'DFP
+#. External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Select one or more specific folders. Select \"<strong>Home</strong>\" and ALL files will be uploaded to this remote (If done, you should add some ignored Doctypes, like mentioned within \"Doctypes ignored for file attachments\" below advanced settings)."
+msgstr ""
+
+#. Description of the 'Use presigned urls' (Check) field in DocType 'DFP
+#. External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Serve bucket objects directly from your S3 provider using \"pre-signed\" urls instead of use your Frappe server as proxy. If files match rules for being returned as presigned url, then cache settings are ignored. Your S3 provider offers some streaming capabilities that you may need (streaming videos for example)"
+msgstr ""
+
+#. Label of a Card Break in the DFP S3 Storage Workspace
+#: dfp_external_storage/dfp_external_storage/workspace/dfp_s3_storage/dfp_s3_storage.json
+msgid "Settings"
+msgstr ""
+
+#. Description of the '¿Secure?' (Check) field in DocType 'DFP External
+#. Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Should be checked for production environments. Will use secure (TLS) connection when connecting to S3 server defined in \"host:port\"."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:9
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:8
+msgid "Size"
+msgstr ""
+
+#: dfp_external_storage/public/js/file_uploader.js:61
+msgid "Storage"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/grid.html:10
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/list.html:9
+msgid "Storage class"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:140
+msgid "Storage configuration issues found: {}"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1156
+msgid "Storage configuration not found"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.py:15
+msgid "Storage name is required"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:178
+msgid "Storage parameter is required"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:99
+msgid "Stream buffer size must be at least of 8192 bytes."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:151
+msgid "Successfully connected to AWS S3"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:157
+msgid "Successfully connected to S3 compatible storage"
+msgstr ""
+
+#. Name of a role
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "System Manager"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:164
+msgid "Template is required"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:23
+msgid "Test S3 Connection"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:58
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:81
+msgid "Testing S3 Connection..."
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:109
+msgid "There are {} files using this bucket. The field you just updated is critical, be careful!"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:829
+msgid "This doctype does not allow remote files attached to it. Check \"DFP External Storage\" advanced settings for more details."
+msgstr ""
+
+#. Label of a Data field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Title or name"
+msgstr ""
+
+#. Label of a Select field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Type"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.js:91
+msgid "Unknown error"
+msgstr ""
+
+#. Description of the 'Cache files smaller than (bytes)' (Int) field in DocType
+#. 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Use Frappe cache over Redis to keep files smaller than and avoid calling to external service several times within time window defined below. Set to 0 to disable. Default: 5000000 bytes = 5Mb"
+msgstr ""
+
+#. Label of a Check field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Use S3 file size"
+msgstr ""
+
+#. Label of a Check field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Use presigned urls"
+msgstr ""
+
+#. Label of a Small Text field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Use presigned urls only for mime types starting with: (one per line)"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/page/dfp_s3_bucket_list/dfp_s3_bucket_list.js:101
+msgid "View mode"
+msgstr ""
+
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.py:1066
+msgid "Write disabled for connection <strong>{}</strong>"
+msgstr ""
+
+#. Label of a Check field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "Write enabled"
+msgstr ""
+
+#. Label of a Data field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "host:port"
+msgstr ""
+
+#. Label of a Check field in DocType 'DFP External Storage'
+#: dfp_external_storage/dfp_external_storage/doctype/dfp_external_storage/dfp_external_storage.json
+msgid "¿Secure?"
+msgstr ""
+
