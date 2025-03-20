@@ -603,34 +603,89 @@ class MinioConnection:
 
 class DFPExternalStorageFile(File):
     def __init__(self, *args, **kwargs):
-        super(DFPExternalStorageFile, self).__init__(*args, **kwargs)
+        try:
+            super(DFPExternalStorageFile, self).__init__(*args, **kwargs)
+            frappe.logger().debug(
+                f"DFPExternalStorageFile initialized for file: {self.name if hasattr(self, 'name') else 'New File'}"
+            )
+        except Exception as e:
+            frappe.logger().error(
+                f"Error initializing DFPExternalStorageFile: {str(e)}"
+            )
+            raise
 
     def validate(self):
         """Validate storage configuration before save"""
-        if self.dfp_external_storage and not self.dfp_external_storage_doc:
-            frappe.throw(
-                "External storage configuration not found. Please verify the storage connection exists."
+        try:
+            # Log validation attempt
+            frappe.logger().debug(
+                f"Validating storage configuration for file: {self.name}"
             )
 
-        if self.dfp_external_storage and not self.dfp_external_storage_doc.client:
-            # Get diagnostic info
-            storage_doc = self.dfp_external_storage_doc
-            issues = []
-            if not storage_doc.endpoint:
-                issues.append("endpoint")
-            if not storage_doc.access_key:
-                issues.append("access key")
-            if not storage_doc.region:
-                issues.append("region")
-            if not storage_doc.bucket_name:
-                issues.append("bucket name")
-
-            if issues:
-                frappe.throw(f"Storage configuration is missing: {', '.join(issues)}")
-            else:
-                frappe.throw(
-                    "Failed to initialize storage client. Please check error logs for details."
+            # Check if external storage is set
+            if self.dfp_external_storage:
+                frappe.logger().debug(
+                    f"External storage set to: {self.dfp_external_storage}"
                 )
+
+                # Check if storage doc exists
+                if not self.dfp_external_storage_doc:
+                    error_msg = "External storage configuration not found. Please verify the storage connection exists."
+                    frappe.logger().error(f"Validation failed: {error_msg}")
+                    frappe.throw(error_msg)
+
+                # Check if client is initialized
+                if not self.dfp_external_storage_client:
+                    # Get diagnostic info
+                    storage_doc = self.dfp_external_storage_doc
+                    issues = []
+                    if not storage_doc.endpoint:
+                        issues.append("endpoint")
+                    if not storage_doc.access_key:
+                        issues.append("access key")
+                    if not storage_doc.region:
+                        issues.append("region")
+                    if not storage_doc.bucket_name:
+                        issues.append("bucket name")
+
+                    if issues:
+                        error_msg = (
+                            f"Storage configuration is missing: {', '.join(issues)}"
+                        )
+                        frappe.logger().error(f"Validation failed: {error_msg}")
+                        frappe.throw(error_msg)
+                    else:
+                        error_msg = "Failed to initialize storage client. Please check error logs for details."
+                        frappe.logger().error(f"Validation failed: {error_msg}")
+                        frappe.throw(error_msg)
+
+                frappe.logger().debug(f"Storage validation successful for {self.name}")
+
+        except Exception as e:
+            frappe.logger().error(
+                f"Unexpected error during storage validation: {str(e)}"
+            )
+            raise
+
+        # if self.dfp_external_storage and not self.dfp_external_storage_doc.client:
+        #     # Get diagnostic info
+        #     storage_doc = self.dfp_external_storage_doc
+        #     issues = []
+        #     if not storage_doc.endpoint:
+        #         issues.append("endpoint")
+        #     if not storage_doc.access_key:
+        #         issues.append("access key")
+        #     if not storage_doc.region:
+        #         issues.append("region")
+        #     if not storage_doc.bucket_name:
+        #         issues.append("bucket name")
+
+        #     if issues:
+        #         frappe.throw(f"Storage configuration is missing: {', '.join(issues)}")
+        #     else:
+        #         frappe.throw(
+        #             "Failed to initialize storage client. Please check error logs for details."
+        #         )
 
     # def get_presigned_or_cdn_url(self):
     #     """Get either CloudFront or presigned URL"""
@@ -783,8 +838,16 @@ class DFPExternalStorageFile(File):
         :param local_file: if given, file path for reading the content. If not given, the content field of this File is used
         """
         try:
+            # Log upload attempt
+            frappe.logger().debug(
+                f"Attempting to upload file to S3: {self.name}, Local file: {local_file}"
+            )
+
             # Check for ignored doctypes
             if self.dfp_external_storage_ignored_doctypes():
+                frappe.logger().info(
+                    f"Doctype ignored for S3 upload: {self.attached_to_doctype}"
+                )
                 self.dfp_external_storage = ""
                 return False
 
@@ -802,6 +865,7 @@ class DFPExternalStorageFile(File):
                 or not self.dfp_external_storage_doc.enabled
             ):
                 frappe.msgprint("External storage is not configured or enabled")
+                frappe.logger().warning("External storage is not configured or enabled")
                 return False
 
             # Validate client exists
@@ -809,22 +873,33 @@ class DFPExternalStorageFile(File):
                 frappe.msgprint(
                     "Failed to initialize storage client. Please check your storage configuration."
                 )
+                frappe.logger().error(
+                    "Failed to initialize storage client. Please check your storage configuration."
+                )
                 return False
 
             if self.is_folder:
+                frappe.logger().debug(f"Cannot upload folder to S3: {self.name}")
                 return False
 
             if self.dfp_external_storage_s3_key:
                 # File already on S3
+                frappe.logger().debug(
+                    f"File already on S3 with key {self.dfp_external_storage_s3_key}"
+                )
                 return False
+
             if self.file_url and self.file_url.startswith(URL_PREFIXES):
+                frappe.logger().error(f"Cannot upload URL file to S3: {self.file_url}")
                 raise NotImplementedError(
                     "http(s)://file(s) not ready to be saved to local or external storage(s)."
                 )
+
             # Add content type detection
             content_type, _ = mimetypes.guess_type(self.file_name)
             if not content_type:
                 content_type = "application/octet-stream"  # Default content type
+            frappe.logger().debug(f"Detected content type: {content_type}")
 
             # Store original file_url for rollback if needed
             original_file_url = self.file_url
@@ -832,15 +907,19 @@ class DFPExternalStorageFile(File):
             # Define S3 key with proper naming
             base, extension = os.path.splitext(self.file_name)
             key = f"{frappe.local.site}/{base}-{self.name}{extension}"
+            frappe.logger().debug(f"Generated S3 key: {key}")
 
             # Determine file path
             is_public = "/public" if not self.is_private else ""
             if not local_file:
                 local_file = "./" + frappe.local.site + is_public + self.file_url
+            frappe.logger().debug(f"Local file path: {local_file}")
 
             # Validate file existence
             if not os.path.exists(local_file):
-                frappe.throw(_("Local file not found: {}").format(local_file))
+                error_msg = f"Local file not found: {local_file}"
+                frappe.logger().error(error_msg)
+                frappe.throw(_(error_msg))
 
             # Upload to S3
             try:
@@ -860,22 +939,25 @@ class DFPExternalStorageFile(File):
                             "Original-Filename": self.file_name,
                         },
                     )
+
                 # Update file document
                 self.dfp_external_storage_s3_key = key
                 self.dfp_external_storage = self.dfp_external_storage_doc.name
                 self.file_url = f"/{DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD}/{self.name}/{self.file_name}"
+                frappe.logger().debug(
+                    f"S3 upload successful. Updated file_url: {self.file_url}"
+                )
 
                 # Remove local file after successful upload
                 os.remove(local_file)
-                # frappe.logger().debug(f"Successfully uploaded {self.file_name} to S3")
+                frappe.logger().debug(f"Removed local file: {local_file}")
                 return True
+
             except Exception as upload_error:
                 error_msg = _("Error saving file in remote folder: {}").format(
                     str(upload_error)
                 )
-                frappe.log_error(
-                    message=upload_error, title=f"{error_msg}: {self.file_name}"
-                )
+                frappe.logger().error(f"{error_msg}: {self.file_name}", exc_info=True)
 
                 # Handle new file upload failure
                 if not self.get_doc_before_save():
@@ -894,8 +976,9 @@ class DFPExternalStorageFile(File):
                     frappe.throw(str(upload_error))
 
         except Exception as e:
-            frappe.logger().error(f"File upload failed: {str(e)}")
-            frappe.log_error(f"File upload error: {str(e)}")
+            frappe.logger().error(
+                f"Unexpected error during S3 upload: {str(e)}", exc_info=True
+            )
             frappe.msgprint(f"Failed to upload file to S3: {str(e)}")
             frappe.throw(_("Failed to upload file to S3: {}").format(str(e)))
             return False
@@ -1404,3 +1487,116 @@ def file(name: str, file: str):
         return Response(**response_values)
 
     raise frappe.PageDoesNotExistError()
+
+
+@frappe.whitelist()
+def test_s3_connection(doc_name=None, connection_data=None):
+    """Test the connection to S3 storage"""
+    try:
+        if doc_name and not connection_data:
+            # If we have a document name but no connection data, load it from the document
+            doc = frappe.get_doc("DFP External Storage", doc_name)
+
+            # Test connection using the document
+            return doc.verify_connection()
+        elif connection_data:
+            # If connection data is provided, use it directly
+            if isinstance(connection_data, str):
+                import json
+
+                connection_data = json.loads(connection_data)
+
+            # For testing a new or modified connection
+            storage_type = connection_data.get("storage_type", "AWS S3")
+            endpoint = connection_data.get("endpoint")
+            secure = connection_data.get("secure", False)
+            bucket_name = connection_data.get("bucket_name")
+            region = connection_data.get("region", "auto")
+            access_key = connection_data.get("access_key")
+
+            # If we're testing an existing document, get the secret key from it
+            if doc_name and not connection_data.get("secret_key"):
+                secret_key = get_decrypted_password(
+                    "DFP External Storage", doc_name, "secret_key"
+                )
+            else:
+                secret_key = connection_data.get("secret_key")
+
+            if not all([endpoint, bucket_name, access_key, secret_key]):
+                missing = []
+                if not endpoint:
+                    missing.append("Endpoint")
+                if not bucket_name:
+                    missing.append("Bucket Name")
+                if not access_key:
+                    missing.append("Access Key")
+                if not secret_key:
+                    missing.append("Secret Key")
+
+                return {
+                    "success": False,
+                    "message": f"Missing required fields: {', '.join(missing)}",
+                }
+
+            # Create a temporary client to test the connection
+            try:
+                if storage_type == "AWS S3":
+                    import boto3
+
+                    client = boto3.client(
+                        "s3",
+                        aws_access_key_id=access_key,
+                        aws_secret_access_key=secret_key,
+                        region_name=region,
+                    )
+
+                    # Test connection by listing buckets
+                    response = client.list_buckets()
+
+                    # Check if bucket exists
+                    bucket_exists = False
+                    for b in response["Buckets"]:
+                        if b["Name"] == bucket_name:
+                            bucket_exists = True
+                            break
+                    if not bucket_exists:
+                        return {
+                            "success": False,
+                            "message": f"Connection successful, but bucket '{bucket_name}' not found. Available buckets: {', '.join([b['Name'] for b in response['Buckets']])}",
+                        }
+
+                    return {
+                        "success": True,
+                        "message": f"Successfully connected to AWS S3. Bucket '{bucket_name}' exists.",
+                    }
+                else:
+                    # S3 Compatible storage
+                    from minio import Minio
+
+                    client = Minio(
+                        endpoint=endpoint,
+                        access_key=access_key,
+                        secret_key=secret_key,
+                        region=region,
+                        sucure=secure,
+                    )
+
+                    # Check if bucket exists
+                    bucket_exists = client.bucket_exists(bucket_name)
+
+                    if not bucket_exists:
+                        return {
+                            "success": False,
+                            "message": f"Connection successful, but bucket '{bucket_name}' not found.",
+                        }
+                    return {
+                        "success": True,
+                        "message": f"Successfully connected to S3 compatible storage. Bucket '{bucket_name}' exists.",
+                    }
+            except Exception as e:
+                return {"success": False, "message": f"Connection failed: {str(e)}"}
+        else:
+            return {"success": False, "message": "No connection data provided"}
+    except Exception as e:
+        frappe.log_error(f"Error testing S3 connection: {str(e)}")
+        return {"success": False, "message": f"Error testing connection: {str(e)}"}
