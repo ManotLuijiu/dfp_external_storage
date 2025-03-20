@@ -1,0 +1,11 @@
+{
+  "files.autoSave": "onFocusChange",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "editor.fontFamily": "Consolas, 'MesloLGS Nerd Font', monospace",
+  "terminal.integrated.fontFamily": "'MesloLGS Nerd Font'",
+  "terminal.integrated.fontSize": 13,
+  "editor.wordWrap": "on"
+}

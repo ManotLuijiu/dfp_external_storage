@@ -1211,73 +1211,102 @@ def hook_file_before_save(doc, method):
     This method is called before the document is saved to DB (insert or update row)
     Critical fields: dfp_external_storage_s3_key, dfp_external_storage and file_url
     """
-    previous = doc.get_doc_before_save()
+    try:
+        previous = doc.get_doc_before_save()
+        print("previous", previous)
 
-    if not previous:
-        # NEW "File": Case 1: remote selected => upload to remote and continue "File" flow
-        doc.dfp_external_storage_upload_file()
-        return
-
-    # MODIFY "File"
-
-    # MODIFY "File": Case 1: Existent local file + new storage selected => upload to remote
-    if (
-        not doc.dfp_external_storage_s3_key
-        and doc.dfp_external_storage
-        and not previous.dfp_external_storage
-    ):
-        doc.dfp_external_storage_upload_file()
-
-    # MODIFY "File": Case 2: Existent remote file + no storage selected => download to local + remove from remote
-    elif previous.dfp_external_storage and not doc.dfp_external_storage:
-        previous.download_to_local_and_remove_remote()
-        doc.file_url = previous.file_url  # << contains local file path downloaded
-        doc.dfp_external_storage_s3_key = ""
-
-    # MODIFY "File": Case 3: Existent remote file + new remote selected => stream from old to new remote + delete from old remote
-    elif (
-        previous.dfp_external_storage
-        and doc.dfp_external_storage
-        and previous.dfp_external_storage != doc.dfp_external_storage
-    ):
-        try:
-            # MODIFY "File": Case 3.1.: new remote + not allowed doctype => download to local + remove old remote
-            # TODO: Maybe we should left in old remote?? and we should check if old remote allows the doctype??
-            if doc.dfp_external_storage_ignored_doctypes():
-                previous.download_to_local_and_remove_remote()
-                doc.file_url = (
-                    previous.file_url
-                )  # << contains local file path downloaded
-                doc.dfp_external_storage_s3_key = ""
-                doc.dfp_external_storage = ""
-            # MODIFY "File": Case 3.2.: new remote + allowed doctype => stream from old to new remote + delete from old remote
-            else:
-                # Get file from previous remote in chunks of 10MB (not loading it fully in memory)
-                with previous.dfp_external_storage_file_proxy() as response:
-                    doc.dfp_external_storage_client.put_object(
-                        bucket_name=doc.dfp_external_storage_doc.bucket_name,
-                        object_name=doc.dfp_external_storage_s3_key,
-                        data=response,
-                        length=response.object_size,
-                        # Meta removed because same s3 file can be used within different File docs
-                        # metadata={"frappe_file_id": self.name}
-                    )
-                # New s3 key => update "file_url"
-                doc.file_url = doc._remote_file_local_path_get()
-                # Remove file from previous remote
-                previous.dfp_external_storage_client.remove_object(
-                    bucket_name=previous.dfp_external_storage_doc.bucket_name,
-                    object_name=previous.dfp_external_storage_s3_key,
+        # Check if the document is a DFPExternalStorageFile instance
+        if not hasattr(doc, "dfp_external_storage_upload_file"):
+            try:
+                # Convert the normal File to DFPExternalStorageFile
+                from frappe.core.doctype.file.file import file
+                from dfp_external_storage.dfp_external_storage.doctype.dfp_external_storage.dfp_external_storage import (
+                    DFPExternalStorageFile,
                 )
-        except:
-            error_msg = _("Error putting file from one remote to another.")
-            frappe.log_error(f"{error_msg}: {doc.file_name}")
-            frappe.throw(error_msg)
 
-    # Clean cache when updating "File"
-    if doc.dfp_external_storage_s3_key:
-        cache_key = f"{DFP_EXTERNAL_STORAGE_PUBLIC_CACHE_PREFIX}{doc.name}"
-        frappe.cache().delete_value(cache_key)
+                # Create a new DFPExternalStorageFile with the same name
+                dfp_file = DFPExternalStorageFile(doc.name)
+
+                # Copy all attributes from the original doc to the new one
+                for key, value in doc.__dict__.items():
+                    if key != "commands" and key != "_meta" and key != "_table_fields":
+                        setattr(dfp_file, key, value)
+
+                # Now process the DFPExternalStorageFile instead
+                doc = dfp_file
+            except Exception as e:
+                frappe.log_error(
+                    f"Failed to convert File to DFPExternalStorageFile: {str(e)}"
+                )
+                return  # Exit early if conversion fails
+
+        if not previous:
+            # NEW "File": Case 1: remote selected => upload to remote and continue "File" flow
+            doc.dfp_external_storage_upload_file()
+            return
+
+        # MODIFY "File"
+
+        # MODIFY "File": Case 1: Existent local file + new storage selected => upload to remote
+        if (
+            not doc.dfp_external_storage_s3_key
+            and doc.dfp_external_storage
+            and not previous.dfp_external_storage
+        ):
+            doc.dfp_external_storage_upload_file()
+
+        # MODIFY "File": Case 2: Existent remote file + no storage selected => download to local + remove from remote
+        elif previous.dfp_external_storage and not doc.dfp_external_storage:
+            previous.download_to_local_and_remove_remote()
+            doc.file_url = previous.file_url  # << contains local file path downloaded
+            doc.dfp_external_storage_s3_key = ""
+
+        # MODIFY "File": Case 3: Existent remote file + new remote selected => stream from old to new remote + delete from old remote
+        elif (
+            previous.dfp_external_storage
+            and doc.dfp_external_storage
+            and previous.dfp_external_storage != doc.dfp_external_storage
+        ):
+            try:
+                # MODIFY "File": Case 3.1.: new remote + not allowed doctype => download to local + remove old remote
+                # TODO: Maybe we should left in old remote?? and we should check if old remote allows the doctype??
+                if doc.dfp_external_storage_ignored_doctypes():
+                    previous.download_to_local_and_remove_remote()
+                    doc.file_url = (
+                        previous.file_url
+                    )  # << contains local file path downloaded
+                    doc.dfp_external_storage_s3_key = ""
+                    doc.dfp_external_storage = ""
+                # MODIFY "File": Case 3.2.: new remote + allowed doctype => stream from old to new remote + delete from old remote
+                else:
+                    # Get file from previous remote in chunks of 10MB (not loading it fully in memory)
+                    with previous.dfp_external_storage_file_proxy() as response:
+                        doc.dfp_external_storage_client.put_object(
+                            bucket_name=doc.dfp_external_storage_doc.bucket_name,
+                            object_name=doc.dfp_external_storage_s3_key,
+                            data=response,
+                            length=response.object_size,
+                            # Meta removed because same s3 file can be used within different File docs
+                            # metadata={"frappe_file_id": self.name}
+                        )
+                    # New s3 key => update "file_url"
+                    doc.file_url = doc._remote_file_local_path_get()
+                    # Remove file from previous remote
+                    previous.dfp_external_storage_client.remove_object(
+                        bucket_name=previous.dfp_external_storage_doc.bucket_name,
+                        object_name=previous.dfp_external_storage_s3_key,
+                    )
+            except:
+                error_msg = _("Error putting file from one remote to another.")
+                frappe.log_error(f"{error_msg}: {doc.file_name}")
+                frappe.throw(error_msg)
+
+        # Clean cache when updating "File"
+        if doc.dfp_external_storage_s3_key:
+            cache_key = f"{DFP_EXTERNAL_STORAGE_PUBLIC_CACHE_PREFIX}{doc.name}"
+            frappe.cache().delete_value(cache_key)
+    except Exception as e:
+        frappe.log_error(f"Error in hook_file_before_save: {str(e)}")
 
 
 def hook_file_on_update(doc, method):
