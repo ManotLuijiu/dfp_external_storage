@@ -18,12 +18,18 @@ frappe.ui.form.on("DFP External Storage", {
       );
     }
 
-    // Add Test Connection button
-    frm
-      .add_custom_button(__("Test S3 Connection"), function () {
-        frm.events.test_s3_connection(frm);
-      })
-      .addClass("btn-primary");
+    // Storage type specific actions
+    if (frm.doc.type === "Google Drive") {
+      // Add Google Drive authentication button
+      setup_google_drive_auth(frm);
+    } else {
+      // Add Test Connection button for S3
+      frm
+        .add_custom_button(__("Test Connection"), function () {
+          frm.events.test_connection(frm);
+        })
+        .addClass("btn-primary");
+    }
 
     frm.set_query("folders", function () {
       return {
@@ -54,8 +60,28 @@ frappe.ui.form.on("DFP External Storage", {
       });
   },
 
+  type: function (frm) {
+    // Show/hide fields based on storage type
+    frm.trigger("refresh");
+  },
+
+  test_connection: function (frm) {
+    if (frm.doc.type === "Google Drive") {
+      frm.events.test_google_drive_connection(frm);
+    } else {
+      frm.events.test_s3_connection(frm);
+    }
+  },
+
   test_s3_connection: function (frm) {
-    frappe.show_message(__("Testing S3 Connection..."));
+    // frappe.show_message(__("Testing S3 Connection..."));
+    frappe.show_alert(
+      {
+        message: __("Testing S3 Connection..."),
+        indicator: "blue",
+      },
+      15
+    ); // Shows for 15 seconds
 
     // Preapare for API call - collect all the necessary fields
     let data = {
@@ -80,7 +106,8 @@ frappe.ui.form.on("DFP External Storage", {
       freeze: true,
       freeze_message: __("Testing S3 Connection..."),
       callback: (r) => {
-        frappe.hide_message();
+        // frappe.hide_message();
+        console.log("Response from test_s3_connection:", r);
         if (r.exc) {
           // Error handling
           frappe.msgprint({
@@ -90,19 +117,39 @@ frappe.ui.form.on("DFP External Storage", {
               __("Failed to connect to S3: ") +
               __(r.exc_msg || "Unknown error"),
           });
-        } else if (r.message.success) {
-          // Success message
+          return;
+        }
+
+        try {
+          // Check if response exists and has the expected structure
+          if (r.message) {
+            if (r.message.success) {
+              frappe.msgprint({
+                title: __("Connection Successful"),
+                indicator: "green",
+                message: __(r.message.message || "Connected successfully"),
+              });
+            } else {
+              frappe.msgprint({
+                title: __("Connection Failed"),
+                indicator: "red",
+                message: __(r.message.message || "Connection test failed"),
+              });
+            }
+          } else {
+            // Handle empty response
+            frappe.msgprint({
+              title: __("Connection Test"),
+              indicator: "orange",
+              message: __("Received empty response from server"),
+            });
+          }
+        } catch (e) {
+          // Handle any unexpected errors in callback processing
           frappe.msgprint({
-            title: __("Connection Successful"),
-            indicator: "green",
-            message: __(r.message.message),
-          });
-        } else {
-          // Failed but with a message
-          frappe.msgprint({
-            title: __("Connection Failed"),
+            title: __("Error"),
             indicator: "red",
-            message: __(r.message.message),
+            message: __("Error processing server response: ") + e.message,
           });
         }
       },
