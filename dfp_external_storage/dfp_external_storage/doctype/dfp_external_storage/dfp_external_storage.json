@@ -11,6 +11,7 @@
     "title",
     "type",
     "html_1",
+    "s3_section",
     "endpoint",
     "column_break_7",
     "secure",
@@ -18,6 +19,13 @@
     "region",
     "access_key",
     "secret_key",
+    "google_drive_section",
+    "google_client_id",
+    "google_client_secret",
+    "google_refresh_token",
+    "google_folder_id",
+    "google_auth_button",
+    "folder_section",
     "folders",
     "files_within",
     "advanced_settings_section",
@@ -34,15 +42,15 @@
   ],
   "fields": [
     {
+      "default": "AWS S3",
       "fieldname": "type",
       "fieldtype": "Select",
       "in_list_view": 1,
       "in_preview": 1,
       "in_standard_filter": 1,
       "label": "Type",
-      "options": "S3 Compatible\nAWS S3",
-      "reqd": 1,
-      "default": "AWS S3"
+      "options": "S3 Compatible\nAWS S3\nGoogle Drive",
+      "reqd": 1
     },
     {
       "description": "Access key (aka user ID) of your account in S3 service.",
@@ -51,7 +59,8 @@
       "fieldtype": "Data",
       "in_list_view": 1,
       "label": "Access Key",
-      "reqd": 1
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'",
+      "reqd": 0
     },
     {
       "description": "Secret Key (aka password) of your account in S3 service.",
@@ -60,7 +69,8 @@
       "fieldtype": "Password",
       "label": "Secret Key",
       "no_copy": 1,
-      "reqd": 1
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'",
+      "reqd": 0
     },
     {
       "default": "auto",
@@ -69,7 +79,8 @@
       "fieldname": "region",
       "fieldtype": "Data",
       "label": "Region",
-      "reqd": 1
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'",
+      "reqd": 0
     },
     {
       "description": "<strong>Be careful!</strong> Please set up your bucket as private in your provider and/or remove public access to objects. <strong>Some files you upload to Frappe will be for sure private!</strong>",
@@ -82,7 +93,8 @@
       "in_preview": 1,
       "in_standard_filter": 1,
       "label": "Bucket name",
-      "reqd": 1
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'",
+      "reqd": 0
     },
     {
       "fieldname": "html_1",
@@ -90,6 +102,7 @@
       "options": "<p>Supports both AWS S3 and S3-compatible storage services:</p>\n<ul>\n<li><strong>AWS S3</strong>: For direct AWS S3 storage</li>\n<li><strong>S3 Compatible</strong>: For MinIO and other S3-compatible services</li>\n</ul>\n<p>Configuration parameters:</p>\n<ul>\n<li><strong>endpoint</strong>: Hostname of the S3 service (e.g., https://s3.amazonaws.com for AWS)</li>\n<li><strong>access_key</strong>: Access key (user ID) of your account</li>\n<li><strong>secret_key</strong>: Secret Key (password) of your account</li>\n<li><strong>secure</strong>: Use secure (TLS) connection</li>\n</ul>"
     },
     {
+      "default": "https://s3.amazonaws.com",
       "description": "Only host and port. For example:\n<ul><li>[id].r2.cloudflarestorage.com:443</li><li>https://s3.amazonaws.com</li><li>minio:9000</li><li>...</li></ul>\nRead <a href=\"https://min.io/docs/minio/linux/developers/python/API.html\" target=\"_blank\">Minio documentation</a> for more info.",
       "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
       "fieldname": "endpoint",
@@ -97,8 +110,8 @@
       "in_list_view": 1,
       "in_standard_filter": 1,
       "label": "host:port",
-      "default": "https://s3.amazonaws.com",
-      "reqd": 1
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'",
+      "reqd": 0
     },
     {
       "default": "0",
@@ -106,7 +119,8 @@
       "documentation_url": "https://min.io/docs/minio/linux/developers/python/API.html",
       "fieldname": "secure",
       "fieldtype": "Check",
-      "label": "\u00bfSecure?"
+      "label": "Secure?",
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'"
     },
     {
       "fieldname": "column_break_7",
@@ -218,8 +232,63 @@
       "fieldtype": "Table MultiSelect",
       "label": "Doctypes ignored for file attachments",
       "options": "DFP External Storage Ignored Doctype"
+    },
+    {
+      "fieldname": "google_drive_section",
+      "fieldtype": "Section Break",
+      "label": "Google Drive Settings",
+      "depends_on": "eval:doc.type=='Google Drive'"
+    },
+    {
+      "fieldname": "google_client_id",
+      "fieldtype": "Data",
+      "label": "Google Client ID",
+      "description": "OAuth 2.0 Client ID from Google Cloud Console",
+      "depends_on": "eval:doc.type=='Google Drive'"
+    },
+    {
+      "fieldname": "google_client_secret",
+      "fieldtype": "Password",
+      "label": "Google Client Secret",
+      "description": "OAuth 2.0 Client Secret from Google Cloud Console",
+      "depends_on": "eval:doc.type=='Google Drive'",
+      "no_copy": 1
+    },
+    {
+      "fieldname": "google_refresh_token",
+      "fieldtype": "Password",
+      "label": "Google Refresh Token",
+      "description": "OAuth 2.0 Refresh Token (obtained through authentication)",
+      "depends_on": "eval:doc.type=='Google Drive'",
+      "read_only": 1,
+      "no_copy": 1
+    },
+    {
+      "fieldname": "google_folder_id",
+      "fieldtype": "Data",
+      "label": "Google Drive Folder ID",
+      "description": "ID of the Google Drive folder to use for storage",
+      "depends_on": "eval:doc.type=='Google Drive'"
+    },
+    {
+      "fieldname": "google_auth_button",
+      "fieldtype": "HTML",
+      "options": "<div class=\"google-auth-button\"><button class=\"btn btn-primary btn-sm\" id=\"google-auth-btn\">Authenticate with Google Drive</button></div>",
+      "depends_on": "eval:doc.type=='Google Drive'"
+    },
+    {
+      "fieldname": "s3_section",
+      "fieldtype": "Section Break",
+      "label": "S3 Storage Settings",
+      "depends_on": "eval:doc.type=='AWS S3' || doc.type=='S3 Compatible'"
+    },
+    {
+      "fieldname": "folder_section",
+      "fieldtype": "Section Break",
+      "label": "Folder Settings"
     }
   ],
+  "grid_page_length": 50,
   "links": [
     {
       "group": "Remote files using this connection",
@@ -227,7 +296,7 @@
       "link_fieldname": "dfp_external_storage"
     }
   ],
-  "modified": "2024-05-29 09:57:12.889797",
+  "modified": "2025-03-24 03:02:47.986884",
   "modified_by": "Administrator",
   "module": "DFP External Storage",
   "name": "DFP External Storage",
