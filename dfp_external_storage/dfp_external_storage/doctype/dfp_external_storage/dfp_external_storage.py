@@ -16,8 +16,13 @@ from frappe.core.doctype.file.file import URL_PREFIXES
 from frappe.model.document import Document
 from frappe.utils.password import get_decrypted_password
 
-logging.basicConfig(level=logging.DEBUG)
+# Import Google Drive integration
+from gdrive_integration import GoogleDriveConnection
 
+# Import OneDrive integration
+from onedrive_integration import OneDriveConnection
+
+logging.basicConfig(level=logging.DEBUG)
 
 DFP_EXTERNAL_STORAGE_PUBLIC_CACHE_PREFIX = "external_storage_public_file:"
 
@@ -45,6 +50,512 @@ DFP_EXTERNAL_STORAGE_CRITICAL_FIELDS = [
     "secret_key",
     "folders",
 ]
+
+class DFPExternalStorageOneDriveFile:
+    """OneDrive implementation for DFP External Storage File"""
+    
+    def __init__(self, file_doc):
+        self.file_doc = file_doc
+        self.file_name = file_doc.file_name
+        self.content_hash = file_doc.content_hash
+        self.storage_doc = file_doc.dfp_external_storage_doc
+        self.client = self._get_onedrive_client()
+        
+    def _get_onedrive_client(self):
+        """Initialize OneDrive client"""
+        try:
+            storage_doc = self.storage_doc
+            client_id = storage_doc.onedrive_client_id
+            client_secret = get_decrypted_password(
+                "DFP External Storage", storage_doc.name, "onedrive_client_secret"
+            )
+            refresh_token = get_decrypted_password(
+                "DFP External Storage", storage_doc.name, "onedrive_refresh_token"
+            )
+            tenant = storage_doc.onedrive_tenant or 'common'
+            
+            return OneDriveConnection(
+                client_id=client_id,
+                client_secret=client_secret,
+                tenant=tenant,
+                refresh_token=refresh_token
+            )
+        except Exception as e:
+            frappe.log_error(f"Failed to initialize OneDrive client: {str(e)}")
+            return None
+    
+    def upload_file(self, local_file=None):
+        """
+        Upload file to OneDrive
+        
+        Args:
+            local_file (str): Local file path
+            
+        Returns:
+            bool: True if upload successful
+        """
+        try:
+            # Check if already uploaded
+            if self.file_doc.dfp_external_storage_s3_key:
+                return False
+                
+            # Determine file path
+            is_public = "/public" if not self.file_doc.is_private else ""
+            if not local_file:
+                local_file = f"./{frappe.local.site}{is_public}{self.file_doc.file_url}"
+                
+            # Check if file exists
+            if not os.path.exists(local_file):
+                frappe.throw(_("Local file not found: {0}").format(local_file))
+                
+            # Determine content type
+            content_type, _ = mimetypes.guess_type(self.file_name)
+            if not content_type:
+                content_type = "application/octet-stream"
+                
+            # Upload file
+            with open(local_file, 'rb') as f:
+                # Upload to OneDrive
+                result = self.client.put_object(
+                    folder_id=self.storage_doc.onedrive_folder_id,
+                    file_name=self.file_name,
+                    data=f,
+                    metadata={"Content-Type": content_type}
+                )
+                
+                # Update file document with OneDrive file ID
+                self.file_doc.dfp_external_storage_s3_key = result.get('id')
+                self.file_doc.dfp_external_storage = self.storage_doc.name
+                
+                # Update file_url to use our custom URL pattern
+                from dfp_external_storage.dfp_external_storage.doctype.dfp_external_storage.dfp_external_storage import DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD
+                self.file_doc.file_url = f"/{DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD}/{self.file_doc.name}/{self.file_name}"
+                
+                # Remove local file
+                os.remove(local_file)
+                return True
+                
+        except Exception as e:
+            error_msg = _("Error saving file to OneDrive: {0}").format(str(e))
+            frappe.log_error(f"{error_msg}: {self.file_name}")
+            
+            # Reset S3 fields for new file
+            if not self.file_doc.get_doc_before_save():
+                error_extra = _("File saved in local filesystem.")
+                frappe.log_error(f"{error_msg} {error_extra}: {self.file_name}")
+                self.file_doc.dfp_external_storage_s3_key = ""
+                self.file_doc.dfp_external_storage = ""
+                # Keep original file_url
+            else:
+                frappe.throw(error_msg)
+            
+            return False
+    
+    def delete_file(self):
+        """Delete file from OneDrive"""
+        if not self.file_doc.dfp_external_storage_s3_key:
+            return False
+            
+        # Check if other files use the same key
+        files_using_key = frappe.get_all(
+            "File",
+            filters={
+                "dfp_external_storage_s3_key": self.file_doc.dfp_external_storage_s3_key,
+                "dfp_external_storage": self.file_doc.dfp_external_storage,
+            },
+        )
+        
+        if len(files_using_key) > 1:
+            # Other files are using this OneDrive file, don't delete
+            return False
+            
+        # Delete from OneDrive
+        try:
+            self.client.remove_object(
+                folder_id=None,  # Not needed for OneDrive
+                file_id=self.file_doc.dfp_external_storage_s3_key
+            )
+            return True
+        except Exception as e:
+            error_msg = _("Error deleting file from OneDrive.")
+            frappe.log_error(f"{error_msg}: {self.file_name}", message=str(e))
+            frappe.throw(f"{error_msg} {str(e)}")
+            return False
+    
+    def download_file(self):
+        """Download file from OneDrive"""
+        try:
+            file_content = self.client.get_object(
+                folder_id=None,  # Not needed for OneDrive
+                file_id=self.file_doc.dfp_external_storage_s3_key
+            )
+            return file_content.read()
+        except Exception as e:
+            error_msg = _("Error downloading file from OneDrive")
+            frappe.log_error(title=f"{error_msg}: {self.file_name}")
+            frappe.throw(error_msg)
+            return b""
+    
+    def stream_file(self):
+        """Stream file from OneDrive"""
+        try:
+            from werkzeug.wsgi import wrap_file
+            
+            file_content = self.client.get_object(
+                folder_id=None,  # Not needed for OneDrive
+                file_id=self.file_doc.dfp_external_storage_s3_key
+            )
+            
+            # Wrap the file content for streaming
+            return wrap_file(
+                environ=frappe.local.request.environ,
+                file=file_content,
+                buffer_size=self.storage_doc.setting_stream_buffer_size
+            )
+        except Exception as e:
+            frappe.log_error(f"OneDrive streaming error: {str(e)}")
+            frappe.throw(_("Failed to stream file from OneDrive"))
+    
+    def download_to_local_and_remove_remote(self):
+        """Download file from OneDrive and remove the remote file"""
+        try:
+            # Get file content
+            file_content = self.client.get_object(
+                folder_id=None,  # Not needed for OneDrive
+                file_id=self.file_doc.dfp_external_storage_s3_key
+            )
+            
+            # Save content
+            self.file_doc._content = file_content.read()
+            
+            # Clear storage info
+            file_id = self.file_doc.dfp_external_storage_s3_key
+            self.file_doc.dfp_external_storage_s3_key = ""
+            self.file_doc.dfp_external_storage = ""
+            
+            # Save to filesystem
+            self.file_doc.save_file_on_filesystem()
+            
+            # Delete from OneDrive
+            self.client.remove_object(
+                folder_id=None,  # Not needed for OneDrive
+                file_id=file_id
+            )
+            
+            return True
+        except Exception as e:
+            error_msg = _("Error downloading and removing file from OneDrive.")
+            frappe.log_error(title=f"{error_msg}: {self.file_name}")
+            frappe.throw(error_msg)
+            return False
+    
+    def get_presigned_url(self):
+        """Get a presigned URL for the file"""
+        try:
+            if not self.storage_doc.presigned_urls:
+                return None
+                
+            # Check mimetype restrictions
+            if (
+                self.storage_doc.presigned_mimetypes_starting
+                and self.file_doc.dfp_mime_type_guess_by_file_name
+            ):
+                presigned_mimetypes_starting = [
+                    i.strip()
+                    for i in self.storage_doc.presigned_mimetypes_starting.split("\n")
+                    if i.strip()
+                ]
+                
+                if not any(
+                    self.file_doc.dfp_mime_type_guess_by_file_name.startswith(i)
+                    for i in presigned_mimetypes_starting
+                ):
+                    return None
+            
+            # Get presigned URL
+            return self.client.presigned_get_object(
+                folder_id=None,  # Not needed for OneDrive
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+                expires=self.storage_doc.setting_presigned_url_expiration
+            )
+        except Exception as e:
+            frappe.log_error(f"Error generating OneDrive presigned URL: {str(e)}")
+            return None
+
+class DFPExternalStorageGoogleDriveFile:
+    """Google Drive implementation for DFP External Storage File"""
+
+    def __init__(self, file_doc):
+        self.file_doc = file_doc
+        self.file_name = file_doc.file_name
+        self.content_hash = file_doc.content_hash
+        self.storage_doc = file_doc.dfp_external_storage_doc
+        self.client = self._get_google_drive_client()
+
+    def _get_google_drive_client(self):
+        """Initialize Google Drive client"""
+        try:
+            storage_doc = self.storage_doc
+            client_id = storage_doc.google_client_id
+            client_secret = get_decrypted_password(
+                "DFP External Storage", storage_doc.name, "google_client_secret"
+            )
+            refresh_token = get_decrypted_password(
+                "DFP External Storage", storage_doc.name, "google_refresh_token"
+            )
+
+            return GoogleDriveConnection(
+                client_id=client_id,
+                client_secret=client_secret,
+                refresh_token=refresh_token,
+            )
+
+        except Exception as e:
+            frappe.log_error(f"Failed to initialize Google Drive client: {str(e)}")
+            return None
+
+    def upload_file(self, local_file=None):
+        """
+        Upload file to Google Drive
+
+        Args:
+            local_file (str): Local file path
+
+        Returns:
+            bool: True if upload successful
+        """
+        try:
+            # Check if already uploaded
+            if self.file_doc.dfp_external_storage_s3_key:
+                return False
+
+            # Determine file path
+            is_public = "/public" if not self.file_doc.is_private else ""
+            if not local_file:
+                local_file = f"./{frappe.local.site}{is_public}{self.file_doc.file_url}"
+
+            # Check if file exists
+            if not os.path.exists(local_file):
+                frappe.throw(_("Local file not found: {0}").format(local_file))
+
+            # Determine content type
+            content_type, _ = mimetypes.guess_type(self.file_name)
+            if not content_type:
+                content_type = "application/octet-stream"
+
+            # Upload file
+            with open(local_file, "rb") as f:
+                file_size = os.path.getsize(local_file)
+
+                # Upload to Google Drive
+                result = self.client.put_object(
+                    folder_id=self.storage_doc.google_folder_id,
+                    file_name=self.file_name,
+                    data=f,
+                    metadata={"Content-Type": content_type},
+                )
+
+                # Update file document with Google Drive file ID
+                self.file_doc.dfp_external_storage_s3_key = result.get("id")
+                self.file_doc.dfp_external_storage = self.storage_doc.name
+                self.file_doc.file_url = f"/{DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD}/{self.file_doc.name}/{self.file_name}"
+
+                # Remove local file
+                os.remove(local_file)
+                return True
+
+        except Exception as e:
+            error_msg = _("Error saving file to Google Drive: {0}").format(str(e))
+            frappe.log_error(f"{error_msg}: {self.file_name}")
+
+            # Reset S3 fields for new file
+            if not self.file_doc.get_doc_before_save():
+                error_extra = _("File saved in local filesystem.")
+                frappe.log_error(f"{error_msg} {error_extra}: {self.file_name}")
+                self.file_doc.dfp_external_storage_s3_key = ""
+                self.file_doc.dfp_external_storage = ""
+                # Keep original file_url
+            else:
+                frappe.throw(error_msg)
+
+            return False
+
+    def delete_file(self):
+        """Delete file from Google Drive"""
+        """Delete file from Google Drive"""
+        if not self.file_doc.dfp_external_storage_s3_key:
+            return False
+
+        # Check if other files use the same key
+        files_using_key = frappe.get_all(
+            "File",
+            filters={
+                "dfp_external_storage_s3_key": self.file_doc.dfp_external_storage_s3_key,
+                "dfp_external_storage": self.file_doc.dfp_external_storage,
+            },
+        )
+
+        if len(files_using_key) > 1:
+            # Other files are using this Drive file, don't delete
+            return False
+
+        # Delete from Google Drive
+        try:
+            self.client.remove_object(
+                folder_id=self.storage_doc.google_folder_id,
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+            )
+            return True
+        except Exception as e:
+            error_msg = _("Error deleting file from Google Drive.")
+            frappe.log_error(f"{error_msg}: {self.file_name}", message=str(e))
+            frappe.throw(f"{error_msg} {str(e)}")
+            return False
+
+    def download_file(self):
+        """Download file from Google Drive"""
+        try:
+            file_content = self.client.get_object(
+                folder_id=self.storage_doc.google_folder_id,
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+            )
+            return file_content.read()
+        except Exception as e:
+            error_msg = _("Error downloading file from Google Drive")
+            frappe.log_error(title=f"{error_msg}: {self.file_name}")
+            frappe.throw(error_msg)
+            return b""
+
+    def stream_file(self):
+        """Stream file from Google Drive"""
+        try:
+            file_content = self.client.get_object(
+                folder_id=self.storage_doc.google_folder_id,
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+            )
+
+            # Wrap the file content for streaming
+            return wrap_file(
+                environ=frappe.local.request.environ,
+                file=file_content,
+                buffer_size=self.storage_doc.setting_stream_buffer_size,
+            )
+        except Exception as e:
+            frappe.log_error(f"Google Drive streaming error: {str(e)}")
+            frappe.throw(_("Failed to stream file from Google Drive"))
+
+    def download_to_local_and_remove_remote(self):
+        """Download file from Google Drive and remove the remote file"""
+        try:
+            # Get file content
+            file_content = self.client.get_object(
+                folder_id=self.storage_doc.google_folder_id,
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+            )
+
+            # Save content
+            self.file_doc._content = file_content.read()
+
+            # Clear storage info
+            self.file_doc.dfp_external_storage_s3_key = ""
+            self.file_doc.dfp_external_storage = ""
+
+            # Save to filesystem
+            self.file_doc.save_file_on_filesystem()
+
+            # Delete from Google Drive
+            self.client.remove_object(
+                folder_id=self.storage_doc.google_folder_id,
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+            )
+
+            return True
+        except Exception as e:
+            error_msg = _("Error downloading and removing file from Google Drive.")
+            frappe.log_error(title=f"{error_msg}: {self.file_name}")
+            frappe.throw(error_msg)
+            return False
+
+    def get_presigned_url(self):
+        """Get a presigned URL for the file"""
+        try:
+            if not self.storage_doc.presigned_urls:
+                return None
+
+            # Check mimetype restrictions
+            if (
+                self.storage_doc.presigned_mimetypes_starting
+                and self.file_doc.dfp_mime_type_guess_by_file_name
+            ):
+                presigned_mimetypes_starting = [
+                    i.strip()
+                    for i in self.storage_doc.presigned_mimetypes_starting.split("\n")
+                    if i.strip()
+                ]
+
+                if not any(
+                    self.file_doc.dfp_mime_type_guess_by_file_name.startswith(i)
+                    for i in presigned_mimetypes_starting
+                ):
+                    return None
+
+            # Get presigned URL
+            return self.client.presigned_get_object(
+                folder_id=self.storage_doc.google_folder_id,
+                file_id=self.file_doc.dfp_external_storage_s3_key,
+                expires=self.storage_doc.setting_presigned_url_expiration,
+            )
+        except Exception as e:
+            frappe.log_error(f"Error generating Google Drive presigned URL: {str(e)}")
+            return None
+
+
+# Functions to update DFPExternalStorageFile class to handle Google Drive
+def handle_storage_type(file_doc):
+    """
+    Handle different storage types and return the appropriate handler
+
+    Args:
+        file_doc: DFPExternalStorageFile instance
+
+    Returns:
+        object: Storage handler instance
+    """
+    storage_type = file_doc.dfp_external_storage_doc.type
+
+    if storage_type == "Google Drive":
+        return DFPExternalStorageGoogleDriveFile(file_doc)
+    return None  # Default S3 handlers will be used
+
+
+# Modifications needed in DFPExternalStorageFile class:
+"""
+The following functions need to be updated in the main DFPExternalStorageFile class:
+
+1. dfp_external_storage_upload_file:
+   - Add a check for Google Drive storage type
+   - Call the appropriate handler
+
+2. dfp_external_storage_delete_file:
+   - Add a check for Google Drive storage type
+   - Call the appropriate handler
+
+3. dfp_external_storage_download_file: 
+   - Add a check for Google Drive storage type
+   - Call the appropriate handler
+
+4. dfp_external_storage_stream_file:
+   - Add a check for Google Drive storage type
+   - Call the appropriate handler
+
+5. download_to_local_and_remove_remote:
+   - Add a check for Google Drive storage type
+   - Call the appropriate handler
+
+6. dfp_presigned_url_get:
+   - Add a check for Google Drive storage type
+   - Call the appropriate handler
+"""
 
 
 class S3FileProxy:

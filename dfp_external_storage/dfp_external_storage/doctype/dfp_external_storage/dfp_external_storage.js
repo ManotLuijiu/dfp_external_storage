@@ -155,4 +155,180 @@ frappe.ui.form.on("DFP External Storage", {
       },
     });
   },
+
+  test_google_drive_connection: function (frm) {
+    // Validate required fields
+    if (!frm.doc.google_client_id || !frm.doc.google_folder_id) {
+      frappe.msgprint({
+        title: __("Missing Information"),
+        indicator: "red",
+        message: __(
+          "Client ID and Folder ID are required to test the connection."
+        ),
+      });
+      return;
+    }
+
+    frappe.show_alert(__("Testing Google Drive Connection..."));
+
+    frappe.call({
+      method:
+        "dfp_external_storage.gdrive_integration.test_google_drive_connection",
+      args: {
+        doc_name: frm.doc.name,
+      },
+      freeze: true,
+      freeze_message: __("Testing Google Drive Connection..."),
+      callback: (r) => {
+        console.log("Response from test_google_drive_connection:", r);
+        if (r.exc) {
+          frappe.msgprint({
+            title: __("Connection Failed"),
+            indicator: "red",
+            message:
+              __("Failed to connect to Google Drive: ") +
+              __(r.exc_msg || "Unknown error"),
+          });
+        } else if (r.message && r.message.success) {
+          frappe.msgprint({
+            title: __("Connection Successful"),
+            indicator: "green",
+            message: __(
+              r.message.message || "Successfully connected to Google Drive."
+            ),
+          });
+        } else {
+          frappe.msgprint({
+            title: __("Connection Failed"),
+            indicator: "red",
+            message: __(
+              r.message
+                ? r.message.message
+                : "Unknown error connecting to Google Drive."
+            ),
+          });
+        }
+      },
+    });
+  },
 });
+
+function setup_google_drive_auth(frm) {
+  // First check if we already have credentials in the session
+  frappe.call({
+    method: "dfp_external_storage.gdrive_integration.get_auth_credentials",
+    callback: (r) => {
+      if (r.message) {
+        // We have credentials, show button to apply them
+        setup_apply_credentials_button(frm, r.message);
+      } else {
+        // No credentials, show authenticate button
+        setup_auth_button(frm);
+      }
+    },
+  });
+}
+
+function setup_auth_button(frm) {
+  $("#google-auth-btn")
+    .off("click")
+    .on("click", function () {
+      // Client ID and secret are required
+      if (!frm.doc.google_client_id || !frm.doc.google_client_secret) {
+        frappe.msgprint({
+          title: __("Missing Information"),
+          indicator: "red",
+          message: __(
+            "Client ID and Client Secret are required for authentication."
+          ),
+        });
+        return;
+      }
+
+      frappe.call({
+        method:
+          "dfp_external_storage.gdrive_integration.initiate_google_drive_auth",
+        args: {
+          doc_name: frm.doc.name,
+          client_id: frm.doc.google_client_id,
+          client_secret: frm.doc.google_client_secret,
+        },
+        callback: (r) => {
+          if (r.message && r.message.success) {
+            // Open the auth URL in a new window
+            const authWindow = window.open(
+              r.message.auth_url,
+              "GoogleDriveAuth",
+              "width=600,height=700,location=yes,resizable=yes,scrollbars=yes,status=yes"
+            );
+
+            // Add message about the popup
+            frappe.show_alert(
+              {
+                message: __(
+                  "Google authentication window opened. Please complete the authentication process in the new window."
+                ),
+                indicator: "blue",
+              },
+              10
+            );
+
+            // Check if window was blocked
+            if (
+              !authWindow ||
+              authWindow.closed ||
+              typeof authWindow.closed === "undefined"
+            ) {
+              frappe.msgprint({
+                title: __("Popup Blocked"),
+                indicator: "red",
+                message: __(
+                  "The authentication popup was blocked. Please allow popups for this site and try again."
+                ),
+              });
+            }
+          } else {
+            frappe.msgprint({
+              title: __("Authentication Failed"),
+              indicator: "red",
+              message: __(
+                r.message
+                  ? r.message.error
+                  : "Failed to initiate Google Drive authentication."
+              ),
+            });
+          }
+        },
+      });
+    });
+}
+
+function setup_apply_credentials_button(frm, credentials) {
+  // Replace the auth button with an apply credentials button
+  $(".google-auth-button").html(
+    `<button class="btn btn-primary btn-sm" id="apply-credentials-btn">Apply Authentication</button>`
+  );
+
+  $("#apply-credentials-btn")
+    .off("click")
+    .on("click", function () {
+      // Set the refresh token in the form
+      frm.set_value("google_refresh_token", credentials.refresh_token);
+
+      frappe.show_alert(
+        {
+          message: __(
+            "Authentication credentials applied. You can now save the document."
+          ),
+          indicator: "green",
+        },
+        5
+      );
+
+      // Replace with re-authenticate button
+      $(".google-auth-button").html(
+        `<button class="btn btn-default btn-sm" id="google-auth-btn">Re-authenticate with Google Drive</button>`
+      );
+      setup_auth_button(frm);
+    });
+}

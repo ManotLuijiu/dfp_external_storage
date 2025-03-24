@@ -273,7 +273,7 @@
     {
       "fieldname": "google_auth_button",
       "fieldtype": "HTML",
-      "options": "<div class=\"google-auth-button\"><button class=\"btn btn-primary btn-sm\" id=\"google-auth-btn\">Authenticate with Google Drive</button></div>",
+      "options": "<div class=\"google-auth-button\" style=\"margin-bottom: 20px;\"><button class=\"btn btn-primary btn-sm\" id=\"google-auth-btn\">Authenticate with Google Drive</button></div>",
       "depends_on": "eval:doc.type=='Google Drive'"
     },
     {
