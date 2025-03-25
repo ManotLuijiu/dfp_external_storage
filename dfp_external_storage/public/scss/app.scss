@@ -19,6 +19,28 @@
 	}
 }
 
+.storage-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    margin-right: 5px;
+}
+
+.file-wrapper {
+    .storage-icon {
+        position: absolute;
+        right: 5px;
+        bottom: 2px;
+        opacity: 0.7;
+    }
+}
+
+.title-area {
+    .storage-icon {
+        margin-right: 8px;
+    }
+}
+
 // Hide add button within "File" links
 [id="page-DFP External Storage"] {
 	button.btn-new[data-doctype="File"] {
