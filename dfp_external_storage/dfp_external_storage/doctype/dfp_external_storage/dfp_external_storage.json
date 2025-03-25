@@ -49,7 +49,7 @@
       "in_preview": 1,
       "in_standard_filter": 1,
       "label": "Type",
-      "options": "S3 Compatible\nAWS S3\nGoogle Drive",
+      "options": "S3 Compatible\nAWS S3\nGoogle Drive\nOneDrive\nDropbox",
       "reqd": 1
     },
     {
@@ -281,6 +281,100 @@
       "fieldtype": "HTML",
       "options": "<div style=\"height: 30px;\"></div>",
       "depends_on": "eval:doc.type=='Google Drive'"
+    },
+    {
+      "fieldname": "onedrive_section",
+      "fieldtype": "Section Break",
+      "label": "OneDrive Settings",
+      "depends_on": "eval:doc.type=='OneDrive'"
+    },
+    {
+      "fieldname": "onedrive_client_id",
+      "fieldtype": "Data",
+      "label": "Microsoft Application (Client) ID",
+      "description": "The Application (Client) ID from your Azure app registration",
+      "depends_on": "eval:doc.type=='OneDrive'"
+    },
+    {
+      "fieldname": "onedrive_client_secret",
+      "fieldtype": "Password",
+      "label": "Microsoft Client Secret",
+      "description": "The Client Secret from your Azure app registration",
+      "depends_on": "eval:doc.type=='OneDrive'",
+      "no_copy": 1
+    },
+    {
+      "fieldname": "onedrive_tenant",
+      "fieldtype": "Data",
+      "label": "Microsoft Tenant ID",
+      "description": "Your Microsoft Tenant ID (use 'common' for multi-tenant apps)",
+      "depends_on": "eval:doc.type=='OneDrive'",
+      "default": "common"
+    },
+    {
+      "fieldname": "onedrive_refresh_token",
+      "fieldtype": "Password",
+      "label": "OneDrive Refresh Token",
+      "description": "OAuth 2.0 Refresh Token (obtained through authentication)",
+      "depends_on": "eval:doc.type=='OneDrive'",
+      "read_only": 1,
+      "no_copy": 1
+    },
+    {
+      "fieldname": "onedrive_folder_id",
+      "fieldtype": "Data",
+      "label": "OneDrive Folder ID",
+      "description": "ID of the OneDrive folder to use for storage",
+      "depends_on": "eval:doc.type=='OneDrive'"
+    },
+    {
+      "fieldname": "onedrive_auth_button",
+      "fieldtype": "HTML",
+      "options": "<div class=\"onedrive-auth-button\"><button class=\"btn btn-primary btn-sm\" id=\"onedrive-auth-btn\">Authenticate with OneDrive</button></div>",
+      "depends_on": "eval:doc.type=='OneDrive'"
+    },
+    {
+      "fieldname": "dropbox_section",
+      "fieldtype": "Section Break",
+      "label": "Dropbox Settings",
+      "depends_on": "eval:doc.type=='Dropbox'"
+    },
+    {
+      "fieldname": "dropbox_app_key",
+      "fieldtype": "Data",
+      "label": "Dropbox App Key",
+      "description": "The App Key from your Dropbox App Console",
+      "depends_on": "eval:doc.type=='Dropbox'"
+    },
+    {
+      "fieldname": "dropbox_app_secret",
+      "fieldtype": "Password",
+      "label": "Dropbox App Secret",
+      "description": "The App Secret from your Dropbox App Console",
+      "depends_on": "eval:doc.type=='Dropbox'",
+      "no_copy": 1
+    },
+    {
+      "fieldname": "dropbox_refresh_token",
+      "fieldtype": "Password",
+      "label": "Dropbox Refresh Token",
+      "description": "OAuth 2.0 Refresh Token (obtained through authentication)",
+      "depends_on": "eval:doc.type=='Dropbox'",
+      "read_only": 1,
+      "no_copy": 1
+    },
+    {
+      "fieldname": "dropbox_folder_path",
+      "fieldtype": "Data",
+      "label": "Dropbox Folder Path",
+      "description": "Path to Dropbox folder, e.g., '/MyFolder' (must start with /)",
+      "depends_on": "eval:doc.type=='Dropbox'"
+    },
+    {
+      "fieldname": "dropbox_auth_button",
+      "fieldtype": "HTML",
+      "options": "<div class=\"dropbox-auth-button\"><button class=\"btn btn-primary btn-sm\" id=\"dropbox-auth-btn\">Authenticate with Dropbox</button></div>",
+      "depends_on": "eval:doc.type=='Dropbox'"
     },
     {
       "fieldname": "s3_section",

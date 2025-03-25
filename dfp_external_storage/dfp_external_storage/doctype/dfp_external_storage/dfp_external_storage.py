@@ -51,16 +51,17 @@ DFP_EXTERNAL_STORAGE_CRITICAL_FIELDS = [
     "folders",
 ]
 
+
 class DFPExternalStorageOneDriveFile:
     """OneDrive implementation for DFP External Storage File"""
-    
+
     def __init__(self, file_doc):
         self.file_doc = file_doc
         self.file_name = file_doc.file_name
         self.content_hash = file_doc.content_hash
         self.storage_doc = file_doc.dfp_external_storage_doc
         self.client = self._get_onedrive_client()
-        
+
     def _get_onedrive_client(self):
         """Initialize OneDrive client"""
         try:
@@ -72,25 +73,25 @@ class DFPExternalStorageOneDriveFile:
             refresh_token = get_decrypted_password(
                 "DFP External Storage", storage_doc.name, "onedrive_refresh_token"
             )
-            tenant = storage_doc.onedrive_tenant or 'common'
-            
+            tenant = storage_doc.onedrive_tenant or "common"
+
             return OneDriveConnection(
                 client_id=client_id,
                 client_secret=client_secret,
                 tenant=tenant,
-                refresh_token=refresh_token
+                refresh_token=refresh_token,
             )
         except Exception as e:
             frappe.log_error(f"Failed to initialize OneDrive client: {str(e)}")
             return None
-    
+
     def upload_file(self, local_file=None):
         """
         Upload file to OneDrive
-        
+
         Args:
             local_file (str): Local file path
-            
+
         Returns:
             bool: True if upload successful
         """
@@ -98,47 +99,50 @@ class DFPExternalStorageOneDriveFile:
             # Check if already uploaded
             if self.file_doc.dfp_external_storage_s3_key:
                 return False
-                
+
             # Determine file path
             is_public = "/public" if not self.file_doc.is_private else ""
             if not local_file:
                 local_file = f"./{frappe.local.site}{is_public}{self.file_doc.file_url}"
-                
+
             # Check if file exists
             if not os.path.exists(local_file):
                 frappe.throw(_("Local file not found: {0}").format(local_file))
-                
+
             # Determine content type
             content_type, _ = mimetypes.guess_type(self.file_name)
             if not content_type:
                 content_type = "application/octet-stream"
-                
+
             # Upload file
-            with open(local_file, 'rb') as f:
+            with open(local_file, "rb") as f:
                 # Upload to OneDrive
                 result = self.client.put_object(
                     folder_id=self.storage_doc.onedrive_folder_id,
                     file_name=self.file_name,
                     data=f,
-                    metadata={"Content-Type": content_type}
+                    metadata={"Content-Type": content_type},
                 )
-                
+
                 # Update file document with OneDrive file ID
-                self.file_doc.dfp_external_storage_s3_key = result.get('id')
+                self.file_doc.dfp_external_storage_s3_key = result.get("id")
                 self.file_doc.dfp_external_storage = self.storage_doc.name
-                
+
                 # Update file_url to use our custom URL pattern
-                from dfp_external_storage.dfp_external_storage.doctype.dfp_external_storage.dfp_external_storage import DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD
+                from dfp_external_storage.dfp_external_storage.doctype.dfp_external_storage.dfp_external_storage import (
+                    DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD,
+                )
+
                 self.file_doc.file_url = f"/{DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD}/{self.file_doc.name}/{self.file_name}"
-                
+
                 # Remove local file
                 os.remove(local_file)
                 return True
-                
+
         except Exception as e:
             error_msg = _("Error saving file to OneDrive: {0}").format(str(e))
             frappe.log_error(f"{error_msg}: {self.file_name}")
-            
+
             # Reset S3 fields for new file
             if not self.file_doc.get_doc_before_save():
                 error_extra = _("File saved in local filesystem.")
@@ -148,14 +152,14 @@ class DFPExternalStorageOneDriveFile:
                 # Keep original file_url
             else:
                 frappe.throw(error_msg)
-            
+
             return False
-    
+
     def delete_file(self):
         """Delete file from OneDrive"""
         if not self.file_doc.dfp_external_storage_s3_key:
             return False
-            
+
         # Check if other files use the same key
         files_using_key = frappe.get_all(
             "File",
@@ -164,16 +168,16 @@ class DFPExternalStorageOneDriveFile:
                 "dfp_external_storage": self.file_doc.dfp_external_storage,
             },
         )
-        
+
         if len(files_using_key) > 1:
             # Other files are using this OneDrive file, don't delete
             return False
-            
+
         # Delete from OneDrive
         try:
             self.client.remove_object(
                 folder_id=None,  # Not needed for OneDrive
-                file_id=self.file_doc.dfp_external_storage_s3_key
+                file_id=self.file_doc.dfp_external_storage_s3_key,
             )
             return True
         except Exception as e:
@@ -181,13 +185,13 @@ class DFPExternalStorageOneDriveFile:
             frappe.log_error(f"{error_msg}: {self.file_name}", message=str(e))
             frappe.throw(f"{error_msg} {str(e)}")
             return False
-    
+
     def download_file(self):
         """Download file from OneDrive"""
         try:
             file_content = self.client.get_object(
                 folder_id=None,  # Not needed for OneDrive
-                file_id=self.file_doc.dfp_external_storage_s3_key
+                file_id=self.file_doc.dfp_external_storage_s3_key,
             )
             return file_content.read()
         except Exception as e:
@@ -195,66 +199,65 @@ class DFPExternalStorageOneDriveFile:
             frappe.log_error(title=f"{error_msg}: {self.file_name}")
             frappe.throw(error_msg)
             return b""
-    
+
     def stream_file(self):
         """Stream file from OneDrive"""
         try:
             from werkzeug.wsgi import wrap_file
-            
+
             file_content = self.client.get_object(
                 folder_id=None,  # Not needed for OneDrive
-                file_id=self.file_doc.dfp_external_storage_s3_key
+                file_id=self.file_doc.dfp_external_storage_s3_key,
             )
-            
+
             # Wrap the file content for streaming
             return wrap_file(
                 environ=frappe.local.request.environ,
                 file=file_content,
-                buffer_size=self.storage_doc.setting_stream_buffer_size
+                buffer_size=self.storage_doc.setting_stream_buffer_size,
             )
         except Exception as e:
             frappe.log_error(f"OneDrive streaming error: {str(e)}")
             frappe.throw(_("Failed to stream file from OneDrive"))
-    
+
     def download_to_local_and_remove_remote(self):
         """Download file from OneDrive and remove the remote file"""
         try:
             # Get file content
             file_content = self.client.get_object(
                 folder_id=None,  # Not needed for OneDrive
-                file_id=self.file_doc.dfp_external_storage_s3_key
+                file_id=self.file_doc.dfp_external_storage_s3_key,
             )
-            
+
             # Save content
             self.file_doc._content = file_content.read()
-            
+
             # Clear storage info
             file_id = self.file_doc.dfp_external_storage_s3_key
             self.file_doc.dfp_external_storage_s3_key = ""
             self.file_doc.dfp_external_storage = ""
-            
+
             # Save to filesystem
             self.file_doc.save_file_on_filesystem()
-            
+
             # Delete from OneDrive
             self.client.remove_object(
-                folder_id=None,  # Not needed for OneDrive
-                file_id=file_id
+                folder_id=None, file_id=file_id  # Not needed for OneDrive
             )
-            
+
             return True
         except Exception as e:
             error_msg = _("Error downloading and removing file from OneDrive.")
             frappe.log_error(title=f"{error_msg}: {self.file_name}")
             frappe.throw(error_msg)
             return False
-    
+
     def get_presigned_url(self):
         """Get a presigned URL for the file"""
         try:
             if not self.storage_doc.presigned_urls:
                 return None
-                
+
             # Check mimetype restrictions
             if (
                 self.storage_doc.presigned_mimetypes_starting
@@ -265,22 +268,23 @@ class DFPExternalStorageOneDriveFile:
                     for i in self.storage_doc.presigned_mimetypes_starting.split("\n")
                     if i.strip()
                 ]
-                
+
                 if not any(
                     self.file_doc.dfp_mime_type_guess_by_file_name.startswith(i)
                     for i in presigned_mimetypes_starting
                 ):
                     return None
-            
+
             # Get presigned URL
             return self.client.presigned_get_object(
                 folder_id=None,  # Not needed for OneDrive
                 file_id=self.file_doc.dfp_external_storage_s3_key,
-                expires=self.storage_doc.setting_presigned_url_expiration
+                expires=self.storage_doc.setting_presigned_url_expiration,
             )
         except Exception as e:
             frappe.log_error(f"Error generating OneDrive presigned URL: {str(e)}")
             return None
+
 
 class DFPExternalStorageGoogleDriveFile:
     """Google Drive implementation for DFP External Storage File"""
@@ -510,7 +514,7 @@ class DFPExternalStorageGoogleDriveFile:
             return None
 
 
-# Functions to update DFPExternalStorageFile class to handle Google Drive
+# Functions to update DFPExternalStorageFile class to handle Google Drive, OneDrive
 def handle_storage_type(file_doc):
     """
     Handle different storage types and return the appropriate handler
@@ -521,10 +525,29 @@ def handle_storage_type(file_doc):
     Returns:
         object: Storage handler instance
     """
+    if not file_doc.dfp_external_storage_doc:
+        return None
+
     storage_type = file_doc.dfp_external_storage_doc.type
 
     if storage_type == "Google Drive":
+        from gdrive_integration import (
+            DFPExternalStorageGoogleDriveFile,
+        )
+
         return DFPExternalStorageGoogleDriveFile(file_doc)
+    elif storage_type == "OneDrive":
+        from onedrive_integration import (
+            DFPExternalStorageOneDriveFile,
+        )
+
+        return DFPExternalStorageOneDriveFile(file_doc)
+
+    elif storage_type == "Dropbox":
+        from dropbox_integration import DFPExternalStorageDropboxFile
+
+        return DFPExternalStorageDropboxFile(file_doc)
+
     return None  # Default S3 handlers will be used
 
 
@@ -1362,6 +1385,11 @@ class DFPExternalStorageFile(File):
                 self.dfp_external_storage = ""
                 return False
 
+            # Get storage handler for the specific storage type
+            storage_handler = handle_storage_type(self)
+            if storage_handler:
+                return storage_handler.upload_file(local_file)
+
             # Basic validations
             # if (
             #     not self.dfp_external_storage_doc
@@ -1493,70 +1521,17 @@ class DFPExternalStorageFile(File):
             frappe.msgprint(f"Failed to upload file to S3: {str(e)}")
             frappe.throw(_("Failed to upload file to S3: {}").format(str(e)))
             return False
-        # if self.dfp_external_storage_ignored_doctypes():
-        #     self.dfp_external_storage = ""
-        #     return False
-        # if (
-        #     not self.dfp_external_storage_doc
-        #     or not self.dfp_external_storage_doc.enabled
-        # ):
-        #     return False
-        # if self.is_folder:
-        #     return False
-        # if self.dfp_external_storage_s3_key:
-        # File already on S3
-        # return False
-        # if self.file_url and self.file_url.startswith(URL_PREFIXES):
-        # frappe.throw(_("Not implemented save http(s)://file(s) to local."))
-        # raise NotImplementedError(
-        #     "http(s)://file(s) not ready to be saved to local or external storage(s)."
-        # )
-
-        # original_file_url = self.file_url
-
-        # Define S3 key
-        # key = f"{frappe.local.site}/{self.file_name}" # << Before 2024.03.03
-        # base, extension = os.path.splitext(self.file_name)
-        # key = f"{frappe.local.site}/{base}-{self.name}{extension}"
-
-        # is_public = "/public" if not self.is_private else ""
-        # if not local_file:
-        # local_file = "./" + frappe.local.site + is_public + self.file_url
-
-        # try:
-        #     if not os.path.exists(local_file):
-        #         frappe.throw(_("Local file not found"))
-        #     with open(local_file, "rb") as f:
-        #         self.dfp_external_storage_client.put_object(
-        #             bucket_name=self.dfp_external_storage_doc.bucket_name,
-        #             object_name=key,
-        #             data=f,
-        #             length=os.path.getsize(local_file),
-        #             # Meta removed because same s3 file can be used within different File docs
-        #             # metadata={"frappe_file_id": self.name}
-        #         )
-
-        #     self.dfp_external_storage_s3_key = key
-        #     self.dfp_external_storage = self.dfp_external_storage_doc.name
-        #     self.file_url = f"/{DFP_EXTERNAL_STORAGE_URL_SEGMENT_FOR_FILE_LOAD}/{self.name}/{self.file_name}"
-        #     os.remove(local_file)
-        # except Exception as e:
-        #     error_msg = _("Error saving file in remote folder: {}").format(str(e))
-        #     frappe.log_error(f"{error_msg}: {self.file_name}", message=e)
-        #     # If file is new we upload to local filesystem
-        #     if not self.get_doc_before_save():
-        #         error_extra = _("File saved in local filesystem.")
-        #         frappe.log_error(f"{error_msg} {error_extra}: {self.file_name}")
-        #         self.dfp_external_storage_s3_key = ""
-        #         self.dfp_external_storage = ""
-        #         self.file_url = original_file_url
-        #     # If modifing existent file throw error
-        #     else:
-        #         frappe.throw(error_msg)
 
     def dfp_external_storage_delete_file(self):
+        """Delete file from external storage"""
         if not self.dfp_is_s3_remote_file():
             return
+
+        # Get storage handler for the specific storage type
+        storage_handler = handle_storage_type(self)
+        if storage_handler:
+            return storage_handler.delete_file()
+
         # Do not delete if other file docs are using same dfp_external_storage
         # and dfp_external_storage_s3_key
         files_using_s3_key = frappe.get_all(
@@ -1648,6 +1623,12 @@ class DFPExternalStorageFile(File):
         content = b""
         if not self.dfp_is_s3_remote_file():
             return content
+
+        # Get storage handler for the specific storage type
+        storage_handler = handle_storage_type(self)
+        if storage_handler:
+            return storage_handler.download_file()
+
         try:
             with self.dfp_external_storage_client.get_object(
                 bucket_name=self.dfp_external_storage_doc.bucket_name,
@@ -1662,6 +1643,12 @@ class DFPExternalStorageFile(File):
         return content
 
     def dfp_external_storage_stream_file(self) -> t.Iterable[bytes]:
+        """Stream file from external storage"""
+        # Get storage handler for the specific storage type
+        storage_handler = handle_storage_type(self)
+        if storage_handler:
+            return storage_handler.stream_file()
+
         try:
             if not self.dfp_external_storage_doc:
                 frappe.throw(_("Storage configuration not found"))
@@ -1680,6 +1667,12 @@ class DFPExternalStorageFile(File):
         # )
 
     def download_to_local_and_remove_remote(self):
+        """Download file from remote and remove it"""
+        # Get storage handler for the specific storage type
+        storage_handler = handle_storage_type(self)
+        if storage_handler:
+            return storage_handler.download_to_local_and_remove_remote()
+
         try:
             bucket = self.dfp_external_storage_doc.bucket_name
             key = self.dfp_external_storage_s3_key
@@ -1771,11 +1764,18 @@ class DFPExternalStorageFile(File):
             return content_type
 
     def dfp_presigned_url_get(self):
+        """Get presigned URL for the file"""
         if (
             not self.dfp_is_s3_remote_file()
             or not self.dfp_external_storage_doc.presigned_urls
         ):
             return
+
+        # Get storage handler for the specific storage type
+        storage_handler = handle_storage_type(self)
+        if storage_handler:
+            return storage_handler.get_presigned_url()
+
         if (
             self.dfp_external_storage_doc.presigned_mimetypes_starting
             and self.dfp_mime_type_guess_by_file_name
