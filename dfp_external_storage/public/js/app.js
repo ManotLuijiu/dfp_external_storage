@@ -9,17 +9,16 @@ function get_storage_icon(storage_type) {
 
   switch (storage_type) {
     case "AWS S3":
-    case "S3 Compatible":
-      icon_html = `<img src="/assets/dfp_external_storage/image/logo/s3-logo.svg" class="storage-icon" alt="S3" />`;
+      icon_html = `<i class="fa-brands fa-aws ${class_external_storage_icon}"></i>`;
       break;
     case "Google Drive":
-      icon_html = `<img src="/assets/dfp_external_storage/image/logo/google-drive-logo.svg" class="storage-icon" alt="Google Drive" />`;
+      icon_html = `<i class="fa-brands fa-google-drive ${class_external_storage_icon}"></i>`;
       break;
     case "OneDrive":
-      icon_html = `<img src="/assets/dfp_external_storage/image/logo/onedrive-logo.png" class="storage-icon" alt="OneDrive" />`;
+      icon_html = `<i class="fa-brands fa-microsoft ${class_external_storage_icon}"></i>`;
       break;
     case "Dropbox":
-      icon_html = `<img src="/assets/dfp_external_storage/image/logo/dropbox-logo.png" class="storage-icon" alt="Dropbox" />`;
+      icon_html = `<i class="fa-brands fa-dropbox ${class_external_storage_icon}"></i>`;
       break;
     default:
       // Fallback to cloud icon
@@ -92,7 +91,9 @@ frappe.views.FileView = class DFPExternalStorageFileView extends (
       if (file.dfp_external_storage_s3_key && file.dfp_external_storage) {
         let $file = $file_grid.find(`[data-name="${file.name}"]`);
         let title = this._dfp_s3_title(file.dfp_external_storage);
-        $file.append(dfp_s3_icon(title));
+        // $file.append(dfp_s3_icon(title));
+        let storage_type = this._get_storage_type(file.dfp_external_storage);
+        insertAnimatedIcon($file, dfp_s3_icon(storage_type, title));
       }
     });
   }
@@ -104,7 +105,12 @@ frappe.ui.form.on("File", {
     let $title_area = frm.$wrapper[0].page.$title_area;
     $title_area.find(`.${class_external_storage_icon}`).remove();
     if (frm.doc.dfp_external_storage_s3_key) {
-      $title_area.prepend(dfp_s3_icon());
+      // $title_area.prepend(dfp_s3_icon());
+      let storage_type = frm.doc.dfp_external_storage_type || "AWS S3";
+      insertAnimatedIcon(
+        $title_area,
+        dfp_s3_icon(storage_type, frm.doc.dfp_external_storage)
+      );
     }
   },
 });
@@ -113,3 +119,11 @@ frappe.ui.form.on("File", {
 frappe.listview_settings["File"] = {
   add_fields: ["dfp_external_storage_s3_key"],
 };
+
+// Helper function to ensure animation triggers when dynamically adding icons
+function insertAnimatedIcon($container, $icon) {
+  // Force a reflow to ensure the animation triggers properly
+  $container.append($icon);
+  void $icon[0].offsetWidth; // This triggers a reflow
+  $icon.addClass("animate-in");
+}

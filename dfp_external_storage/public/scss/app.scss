@@ -1,7 +1,21 @@
-
 .dfp-storage-external-icon {
 	color: cornflowerblue;
+	opacity: 0;
+  	transform: scale(0.8);
+  	transition: all 0.3s ease-in-out;
+  	animation: icon-appear 0.4s forwards;
 }
+
+@keyframes icon-appear {
+	0% {
+	  opacity: 0;
+	  transform: scale(0.8);
+	}
+	100% {
+	  opacity: 0.7;
+	  transform: scale(1);
+	}
+  }
 
 .file-wrapper {
 	.dfp-storage-external-icon {
@@ -9,6 +23,11 @@
 		right: 5px;
 		bottom: 2px;
 		opacity: 0.7;
+
+		&:hover {
+			opacity: 1;
+			transform: scale(1.1);
+		}
 	}
 }
 
@@ -16,6 +35,12 @@
 	.dfp-storage-external-icon {
 		margin-right: 8px;
 		font-size: 1.1rem;
+		opacity: 0.7;
+    
+		&:hover {
+			opacity: 1;
+			transform: scale(1.1);
+		}
 	}
 }
 
