@@ -29,7 +29,7 @@ def _import_extension_modules():
     global GoogleDriveConnection, OneDriveConnection, DropboxConnection
 
     try:
-        from dfp_external_storage.gdrive_integration import (  # type: ignore
+        from dfp_external_storage.gdrive_integration import (
             GoogleDriveConnection as GDrive,
         )
 
@@ -38,7 +38,7 @@ def _import_extension_modules():
         pass
 
     try:
-        from dfp_external_storage.onedrive_integration import (  # type: ignore
+        from dfp_external_storage.onedrive_integration import (
             OneDriveConnection as OneDrive,
         )
 
@@ -47,7 +47,7 @@ def _import_extension_modules():
         pass
 
     try:
-        from dfp_external_storage.dropbox_integration import (  # type: ignore
+        from dfp_external_storage.dropbox_integration import (
             DropboxConnection as Dropbox,
         )
 
@@ -848,7 +848,7 @@ class DFPExternalStorage(Document):
             elif self.type == "Google Drive":
                 # Call Google Drive test method
                 # This would be implemented in the gdrive_integration module
-                from dfp_external_storage.gdrive_integration import test_connection  # type: ignore
+                from dfp_external_storage.gdrive_integration import test_connection
 
                 result = test_connection(self)
                 if result.get("success"):
@@ -866,7 +866,7 @@ class DFPExternalStorage(Document):
                     return False
             elif self.type == "OneDrive":
                 # Call OneDrive test method
-                from dfp_external_storage.onedrive_integration import test_connection  # type: ignore
+                from dfp_external_storage.onedrive_integration import test_connection
 
                 result = test_connection(self)
                 if result.get("success"):
@@ -884,7 +884,7 @@ class DFPExternalStorage(Document):
                     return False
             elif self.type == "Dropbox":
                 # Call Dropbox test method
-                from dfp_external_storage.dropbox_integration import test_connection  # type: ignore
+                from dfp_external_storage.dropbox_integration import test_connection
 
                 result = test_connection(self)
                 if result.get("success"):
@@ -1094,7 +1094,7 @@ class DFPExternalStorage(Document):
         # For other storage types, implement in their respective modules
         elif self.type == "Google Drive":
             try:
-                from dfp_external_storage.gdrive_integration import list_files  # type: ignore
+                from dfp_external_storage.gdrive_integration import list_files
 
                 return list_files(self)
             except ImportError:
@@ -1103,7 +1103,7 @@ class DFPExternalStorage(Document):
 
         elif self.type == "OneDrive":
             try:
-                from dfp_external_storage.onedrive_integration import list_files  # type: ignore
+                from dfp_external_storage.onedrive_integration import list_files
 
                 return list_files(self)
             except ImportError:
@@ -1112,7 +1112,7 @@ class DFPExternalStorage(Document):
 
         elif self.type == "Dropbox":
             try:
-                from dfp_external_storage.dropbox_integration import list_files  # type: ignore
+                from dfp_external_storage.dropbox_integration import list_files
 
                 return list_files(self)
             except ImportError:
@@ -2761,7 +2761,7 @@ def test_s3_connection(doc_name=None, connection_data=None):
             # For other storage types, route to appropriate handler
             elif storage_type == "Google Drive":
                 try:
-                    from dfp_external_storage.gdrive_integration import (  # type: ignore
+                    from dfp_external_storage.gdrive_integration import (
                         test_connection_params,
                     )
 
@@ -2774,7 +2774,7 @@ def test_s3_connection(doc_name=None, connection_data=None):
 
             elif storage_type == "OneDrive":
                 try:
-                    from dfp_external_storage.onedrive_integration import (  # type: ignore
+                    from dfp_external_storage.onedrive_integration import (
                         test_connection_params,
                     )
 
@@ -2787,7 +2787,7 @@ def test_s3_connection(doc_name=None, connection_data=None):
 
             elif storage_type == "Dropbox":
                 try:
-                    from dfp_external_storage.dropbox_integration import (  # type: ignore
+                    from dfp_external_storage.dropbox_integration import (
                         test_connection_params,
                     )
 

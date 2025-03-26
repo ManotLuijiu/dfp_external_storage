@@ -162,7 +162,7 @@ def run_auto_reconnect(report_path=None):
             report_path = os.path.join(reports_dir, report_files[0])
 
         # Import the reconnection tool and run it
-        from dfp_external_storage.reconnect import main as reconnect_main
+        from reconnect import main as reconnect_main
 
         # Setup args
         class Args:
