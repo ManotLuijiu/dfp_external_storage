@@ -1,0 +1,7 @@
+{
+  "extraPaths": [
+    "/home/frappe/moo-bench",
+    "/home/frappe/moo-bench/apps",
+    "/home/frappe/moo-bench/apps/frappe"
+  ]
+}

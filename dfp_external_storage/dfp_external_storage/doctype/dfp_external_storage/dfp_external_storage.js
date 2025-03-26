@@ -20,7 +20,20 @@ frappe.ui.form.on("DFP External Storage", {
 
     // Storage type specific actions
     if (frm.doc.type === "Google Drive") {
-      // Add Google Drive authentication button
+      // Add Google Drive section with auth button if not already present
+      if (!frm.fields_dict.google_auth_section) {
+        frm.add_custom_section(
+          "google_auth_section",
+          "Google Drive Authentication"
+        );
+        $(frm.fields_dict.google_auth_section.wrapper).html(
+          `<div class="google-auth-button mt-2 mb-3">
+              <button class="btn btn-primary btn-sm" id="google-auth-btn">
+                Authenticate with Google Drive
+              </button>
+          </div>`
+        );
+      }
       setup_google_drive_auth(frm);
     } else if (frm.doc.type === "OneDrive") {
       // Add OneDrive authentication button
@@ -76,7 +89,7 @@ frappe.ui.form.on("DFP External Storage", {
     } else if (frm.doc.type === "OneDrive") {
       frm.events.test_onedrive_connection(frm);
     } else if (frm.doc.type === "Dropbox") {
-      test_dropbox_connection(frm);
+      frm.events.test_dropbox_connection(frm);
     } else {
       frm.events.test_s3_connection(frm);
     }
@@ -234,7 +247,7 @@ frappe.ui.form.on("DFP External Storage", {
       return;
     }
 
-    frappe.show_message(__("Testing OneDrive Connection..."));
+    frappe.show_alert(__("Testing OneDrive Connection..."));
 
     frappe.call({
       method:
@@ -289,7 +302,7 @@ frappe.ui.form.on("DFP External Storage", {
       });
       return;
     }
-    frappe.show_message(__("Testing Dropbox Connection..."));
+    frappe.show_alert(__("Testing Dropbox Connection..."));
 
     frappe.call({
       method:

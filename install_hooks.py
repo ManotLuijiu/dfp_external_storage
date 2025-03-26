@@ -75,7 +75,7 @@ def check_for_disconnected_files():
             FROM `tabFile`
             WHERE file_url LIKE '/file/%/%'
             AND (dfp_external_storage IS NULL OR dfp_external_storage = '')
-        """
+            """
         )[0][0]
 
         return count

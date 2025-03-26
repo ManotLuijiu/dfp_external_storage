@@ -3,8 +3,8 @@ from . import __version__ as app_version
 app_name = "dfp_external_storage"
 app_title = "DFP External Storage"
 app_publisher = "DFP"
-app_description = "S3 compatible external storage for Frappe and ERPNext"
-app_email = "developmentforpeople@gmail.com"
+app_description = "S3 compatible, Google Drive, OneDrive, and Dropbox external storage for Frappe and ERPNext"
+app_email = "moocoding@gmail.com"
 app_license = "MIT"
 
 # Includes in <head>
