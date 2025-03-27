@@ -25,7 +25,6 @@
     "google_refresh_token",
     "google_folder_id",
     "google_auth_button",
-    "google_auth_spacer",
     "onedrive_section",
     "onedrive_client_id",
     "onedrive_client_secret",
@@ -287,13 +286,7 @@
     {
       "fieldname": "google_auth_button",
       "fieldtype": "HTML",
-      "options": "<div class=\"google-auth-button\" style=\"margin-bottom: 20px;\"><button class=\"btn btn-primary btn-sm\" id=\"google-auth-btn\">Authenticate with Google Drive</button></div>",
-      "depends_on": "eval:doc.type=='Google Drive'"
-    },
-    {
-      "fieldname": "google_auth_spacer",
-      "fieldtype": "HTML",
-      "options": "<div style=\"height: 30px;\"></div>",
+      "options": "<div class=\"google-auth-button\" style=\"margin-bottom: 15px;\"><button class=\"btn btn-primary btn-sm\" id=\"google-auth-btn\">Authenticate with Google Drive</button></div>",
       "depends_on": "eval:doc.type=='Google Drive'"
     },
     {
@@ -344,7 +337,7 @@
     {
       "fieldname": "onedrive_auth_button",
       "fieldtype": "HTML",
-      "options": "<div class=\"onedrive-auth-button\" style=\"margin-bottom: 20px;\"><button class=\"btn btn-primary btn-sm\" id=\"onedrive-auth-btn\">Authenticate with OneDrive</button></div>",
+      "options": "<div class=\"onedrive-auth-button\" style=\"margin-bottom: 15px;\"><button class=\"btn btn-primary btn-sm\" id=\"onedrive-auth-btn\">Authenticate with OneDrive</button></div>",
       "depends_on": "eval:doc.type=='OneDrive'"
     },
     {
@@ -387,7 +380,7 @@
     {
       "fieldname": "dropbox_auth_button",
       "fieldtype": "HTML",
-      "options": "<div class=\"dropbox-auth-button\" style=\"margin-bottom: 20px;\"><button class=\"btn btn-primary btn-sm\" id=\"dropbox-auth-btn\">Authenticate with Dropbox</button></div>",
+      "options": "<div class=\"dropbox-auth-button\" style=\"margin-bottom: 15px;\"><button class=\"btn btn-primary btn-sm\" id=\"dropbox-auth-btn\">Authenticate with Dropbox</button></div>",
       "depends_on": "eval:doc.type=='Dropbox'"
     },
     {
