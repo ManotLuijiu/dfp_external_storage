@@ -27,7 +27,7 @@ after_install = "dfp_external_storage.install_hooks.after_install"
 after_sync = "dfp_external_storage.install_hooks.after_sync"
 
 # Uninstallation hook
-before_uninstall = "dfp_external_storage.uninstall.before_uninstall"
+# before_uninstall = "dfp_external_storage.uninstall.before_uninstall"
 
 # DFP: More info about doc event hooks: https://frappeframework.com/docs/v13/user/en/basics/doctypes/controllers
 doc_events = {
